@@ -68,6 +68,7 @@ resistor of 2.7 ohms.
 **Example 1:**
 <pre><strong>Input:</strong> baseResistances = [1, 5, 10], ideal resistance = 3.01, maxResistors = 3
 <strong>Output:</strong> Either "((0)+(0))+(0)" or "(0)+((0)+(0))" will be accepted.
+</pre>
 <strong>Explanation: </strong>It is valid use multiple base resistors of the same value.
 This example is largely to clarify that you are not limited in how many VALUES you use out of those available for 
 your base resistors, nor are you limited in how many base resistors you use of any given value so long as the total 
@@ -77,27 +78,29 @@ As such, "(1)" is not an optimal approximation, since as shown above there exist
 resistance produced by the lone 5 ohm resistor the configuration "(1)" represents.
 
 If you're still confused, please read Clarification 1.
-</pre>
+
 
 
 **Example 2:**
 <pre><strong>Input:</strong> baseResistances = [10, 20], ideal resistance = pi*10, maxResistors = 5
 <strong>Output:</strong> "((1)+((1)//((1)+((0)//(1)))))" or any synonymous SCF string will be accepted.
+</pre>
 <strong>Explanation: </strong>This SCF string represents a configuration of base resistors with equivalent resistance around 3.142857,
 the closest to pi*10 of any possible configuration of at most 5 resistors whose values can each be either 1 or 2 ohms.
 Note: My unit tests directly compute the equivalent resistance represented by your output string, so SCF strings
 representing analogous configurations all work if they use the same equivalent resistance and number of components.
-</pre>
+
 
 
 **Example 3:**
 <pre><strong>Input:</strong> baseResistances = [1, 8], ideal resistance = 2.1, maxResistors = 4
 <strong>Output:</strong> "(0)+(0)"
+</pre>
 <strong>Explanation: </strong>Although you can use up to 3 resistors to produce an equivalent, the closest value possible is still 2,
 which you only need two resistors i.e. 1 ohm in series with 1 ohm to produce it. While "((1)//(1))//((1)//(1))" still 
 produces a 2 ohm equivalent resistance, this configuration does not meet condition #2 for qualifying as an optimal 
 approximation as outlined above.
-</pre>
+
 
 
 **Constraints:**
