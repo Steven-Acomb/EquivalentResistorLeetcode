@@ -1,4 +1,4 @@
-package equivalentResistance;
+package com.stephenacomb;
 
 import java.util.function.BiFunction;
 
