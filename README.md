@@ -104,6 +104,8 @@ approximation as outlined above.
 <ul>
 	<li><code>For this example, your solution needn't be extensible to components besides resistors. (1) </code></li>
 	<li><code>Your solution may be within +/- 0.0001% of the unit test to account for variances due to floating point arithmetic.</code></li>
+	<li><code>You can reliably assume that neither array sizes nor output string lengths will exceed Java's limits. </code></li>
+	<li><code>Your code must be efficient enough (at a minimum!) to pass the included tests with the default heap size. </code></li>
 </ul>
 
 (1) For a followup question or an extra challenge of course, you're highly encouraged to try!
