@@ -111,7 +111,7 @@ approximation as outlined above.
 (1) For a followup question or an extra challenge of course, you're highly encouraged to try!
 
 **Clarification 1:**
-<pre>
+
 As a mental image for pure software people, picture standing in front of a cabinet with one drawer for each entry in
 the baseResistances array. Each drawer contains an infinite number of resistors, each resistor having 
 the same resistance as all the others in its drawer, corresponding to that entry.
@@ -128,7 +128,7 @@ resistance value, including the fact that you can make even more elaborate equiv
 you can create a wide variety of values by connecting a bunch of them in different ways.
 The restriction in this problem is therefore on how many of those physical "base" resistors you use, 
 not how many types of resistors, and not how many resistance values you use or generate intermediately.
-</pre>
+
 If you're purely a software person and somehow the description of this problem was challenging for you, please DM me.
 
 I have zero clue how I can make this any simpler, so I'd like to hear how you'd describe this problem in your words instead.
