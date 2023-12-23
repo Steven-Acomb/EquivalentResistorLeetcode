@@ -1,9 +1,9 @@
 package com.stephenacomb;
 
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.AfterClass;
+import org.junit.Test;
 
 public class ResistorApproximatorTest {
 	
@@ -105,8 +105,7 @@ public class ResistorApproximatorTest {
 		ResistorApproximator apx = new ResistorApproximator(baseResistances);
 		int maxResistors = 8;
 		double expected = 11200.0/3;
-		double actual = apx.evaluateResistorConfiguration(
-				apx.approximate(Double.MAX_VALUE, maxResistors));
+		double actual = apx.evaluateResistorConfiguration(apx.approximate(expected, maxResistors));
 		assertEquals(expected, actual, (expected/DELTA));
 		points += 1.0;
 	}
@@ -117,8 +116,7 @@ public class ResistorApproximatorTest {
 		ResistorApproximator apx = new ResistorApproximator(baseResistances);
 		int maxResistors = 13;
 		double expected = 1;
-		double actual = apx.evaluateResistorConfiguration(
-				apx.approximate(Double.MAX_VALUE, maxResistors));
+		double actual = apx.evaluateResistorConfiguration(apx.approximate(expected, maxResistors));
 		assertEquals(expected, actual, (expected/DELTA));
 		points += 1.0;
 	}
@@ -127,17 +125,41 @@ public class ResistorApproximatorTest {
 	public void test8() {
 		double[] baseResistances = new double[] {17};
 		ResistorApproximator apx = new ResistorApproximator(baseResistances);
-		int maxResistors = 10;
+		int maxResistors = 11;
 		double expected = 19;
-		double actual = apx.evaluateResistorConfiguration(
-				apx.approximate(Double.MAX_VALUE, maxResistors));
+		double actual = apx.evaluateResistorConfiguration(apx.approximate(expected, maxResistors));
+		assertEquals(expected, actual, (expected/DELTA));
+		points += 1.0;
+	}
+
+	// Specific tests for simpler case where you only have one base resistance to build your equivalent from: 
+	@Test
+	public void test9() {
+		double[] baseResistances = new double[] {1};
+		ResistorApproximator apx = new ResistorApproximator(baseResistances);
+		int maxResistors = 9;
+		String config = "(((0)+(0))+(((0)+(0))//(((0)+(0))+((0)//((0)+(0))))))"; // = 22/7 ~= 3.142857142857143
+		double expected = apx.evaluateResistorConfiguration(config);
+		double actual = apx.evaluateResistorConfiguration(apx.approximate(expected, maxResistors));
+		assertEquals(expected, actual, (expected/DELTA));
+		points += 1.0;
+	}
+
+	@Test
+	public void test10() {
+		double[] baseResistances = new double[] {1};
+		ResistorApproximator apx = new ResistorApproximator(baseResistances);
+		int maxResistors = 4;
+		String config = "((0)+((0)//((0)//(0))))"; // = 4/3 ~= 1.3333333333333333
+		double expected = apx.evaluateResistorConfiguration(config);
+		double actual = apx.evaluateResistorConfiguration(apx.approximate(expected, maxResistors));
 		assertEquals(expected, actual, (expected/DELTA));
 		points += 1.0;
 	}
 	
 	@AfterClass
 	public static void showPoints() {
-		System.out.printf("RESISTOR_APPROXIMATOR POINTS = %.1f of 8.0\n", points);
+		System.out.printf("RESISTOR_APPROXIMATOR POINTS = %.1f of 10.0\n", points);
 	}
 
 }
