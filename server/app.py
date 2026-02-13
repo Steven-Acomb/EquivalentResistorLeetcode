@@ -76,10 +76,34 @@ async def get_problem():
                 "solution_file": solution_file,
             })
 
+    # Load test case metadata
+    tests_meta = []
+    testcases_path = problem_dir / "testcases.json"
+    if testcases_path.is_file():
+        testcases = json.loads(testcases_path.read_text())
+        for tc in testcases.get("tests", []):
+            # Build a display-friendly target
+            target = tc.get("targetResistance")
+            if isinstance(target, dict) and target.get("type") == "evaluateConfig":
+                target_display = f'evaluateConfig("{target["config"]}")'
+            elif target == "MAX":
+                target_display = "MAX (infinity)"
+            else:
+                target_display = str(target)
+
+            tests_meta.append({
+                "id": tc["id"],
+                "description": tc.get("description", ""),
+                "num_base_resistances": len(tc.get("baseResistances", [])),
+                "target_resistance": target_display,
+                "max_resistors": tc.get("maxResistors"),
+            })
+
     return {
         "problem": _PROBLEM_SLUG,
         "description_html": description_html,
         "languages": languages,
+        "tests": tests_meta,
     }
 
 

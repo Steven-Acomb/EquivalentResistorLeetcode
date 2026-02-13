@@ -128,6 +128,13 @@ html, body {
     font-size: 0.8rem;
 }
 
+.result-detail {
+    color: #888;
+    font-size: 0.8rem;
+    padding-left: 3.6rem;
+    padding-bottom: 0.1rem;
+}
+
 .result-message {
     color: #888;
     font-size: 0.8rem;

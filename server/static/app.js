@@ -197,6 +197,8 @@ function renderResults(result) {
         summary.passed + '/' + summary.total + ' passed (' + summary.time_seconds + 's)</div>';
 
     for (const test of result.tests) {
+        const meta = getTestMeta(test.name);
+
         // Per-test mode (has verdict)
         if (test.verdict) {
             const label = VERDICT_LABELS[test.verdict] || test.verdict.toUpperCase();
@@ -207,6 +209,15 @@ function renderResults(result) {
                 '<span>' + escapeHtml(test.name) + '</span>' +
                 '<span class="result-meta">(' + test.time_seconds + 's, ' + test.memory_mb + 'MB)</span>' +
                 '</div>';
+
+            if (meta) {
+                html += '<div class="result-detail">' +
+                    escapeHtml(meta.description) +
+                    ' — ' + meta.num_base_resistances + ' base values, ' +
+                    'max ' + meta.max_resistors + ' resistors, ' +
+                    'target: ' + escapeHtml(meta.target_resistance) +
+                    '</div>';
+            }
 
             if (test.message) {
                 html += '<div class="result-message collapsed" onclick="this.classList.toggle(\'collapsed\')">' +
@@ -223,6 +234,15 @@ function renderResults(result) {
                 '<span>' + escapeHtml(test.name) + '</span>' +
                 '<span class="result-meta">(' + test.time_seconds + 's)</span>' +
                 '</div>';
+
+            if (meta) {
+                html += '<div class="result-detail">' +
+                    escapeHtml(meta.description) +
+                    ' — ' + meta.num_base_resistances + ' base values, ' +
+                    'max ' + meta.max_resistors + ' resistors, ' +
+                    'target: ' + escapeHtml(meta.target_resistance) +
+                    '</div>';
+            }
 
             if (!test.passed && test.message) {
                 html += '<div class="result-message collapsed" onclick="this.classList.toggle(\'collapsed\')">' +
@@ -283,6 +303,15 @@ document.getElementById('btn-save').addEventListener('click', saveSolution);
 document.getElementById('btn-reset').addEventListener('click', resetSolution);
 
 // ---- Utilities ----
+
+function getTestMeta(testName) {
+    if (!problemData || !problemData.tests) return null;
+    // Extract ID from "test_1", "test_2", etc.
+    const match = testName.match(/(\d+)$/);
+    if (!match) return null;
+    const id = parseInt(match[1], 10);
+    return problemData.tests.find(t => t.id === id) || null;
+}
 
 function escapeHtml(str) {
     const div = document.createElement('div');
