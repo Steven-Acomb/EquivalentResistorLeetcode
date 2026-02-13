@@ -1,0 +1,5 @@
+{
+  "solution_file": "src/main/java/com/stephenacomb/Solution.java",
+  "test_command": "mvn test",
+  "junit_xml_glob": "target/surefire-reports/TEST-*.xml"
+}

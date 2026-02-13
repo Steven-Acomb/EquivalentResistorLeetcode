@@ -1,0 +1,5 @@
+{
+  "solution_file": "solution.py",
+  "test_command": "pytest --junitxml=results.xml -v",
+  "junit_xml_glob": "results.xml"
+}
