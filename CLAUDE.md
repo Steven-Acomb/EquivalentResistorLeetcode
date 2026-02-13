@@ -74,7 +74,7 @@ This means this project must be:
 0. ~~Repo restructure~~ (done)
 1. ~~Python support~~ (done)
 2. ~~Local execution engine~~ (done) — `engine/` package + CLI
-2.5. ~~Engine hardening~~ (mostly done) — per-test execution, TLE/MLE/RTE verdicts, resource limits. Remaining: reorder tests (move E96 test to end).
+2.5. ~~Engine hardening~~ (done) — per-test execution, TLE/MLE/RTE verdicts, resource limits, brute-force examples
 3. Local web interface — Monaco editor, problem viewer, submit/results via HTTP API
 4. Solution & test case management — auto-save, history, test case editor
 5. Scoring & polish — time/memory measurement, difficulty ratings, more languages

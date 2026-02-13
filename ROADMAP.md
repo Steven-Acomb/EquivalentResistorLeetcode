@@ -85,29 +85,137 @@ Findings from acid-testing the platform with brute-force solutions in both langu
 
 - [x] Fix engine error reporting: detect signal-based kills (SIGKILL/OOM) and report as "RUNTIME ERROR (process killed)" instead of "BUILD ERROR"
 - [x] Per-test execution with resource limits: engine runs each test individually with `RLIMIT_CPU` time limits and `/proc`-based memory monitoring. Produces distinct verdicts: `passed`, `failed`, `time_limit_exceeded` (`TLE`), `memory_limit_exceeded` (`MLE`), `runtime_error` (`RTE`). Limits defined in `testcases.json` (language-agnostic), enforced by the engine. `--no-per-test` flag falls back to batch mode. Supersedes earlier language-specific timeout approach (pytest-timeout / Surefire timeout).
-- [ ] Reorder tests: move the E96 151-value test (test 1) to the end of the suite so simpler tests run first
+- [x] ~~Reorder tests~~ — no longer needed: per-test execution isolates each test in its own subprocess, so a TLE/MLE on test 1 doesn't block the rest
 - [x] Add brute-force examples per language under `problems/.../examples/` with instructions in README for running them via the engine's `-s` flag
 - [x] Clarify engine workflow in README: document per-test output format, verdicts (TLE/MLE/RTE), `--no-per-test` flag, and brute-force examples
 
-## Phase 3: Local Web Interface
+## Phase 3: Local Problem Workbench
 
-A locally-hosted webapp for browsing problems, editing code, and submitting solutions.
+A locally-hosted, browser-based interface for reading the problem, writing solutions, and
+running tests — the core LeetCode workflow, for a single problem, running entirely on the
+user's machine after a git clone.
 
-- [ ] Choose frontend stack (e.g. React + Vite, or something lighter like plain HTML + HTMX)
-- [ ] Choose backend stack (e.g. FastAPI or Flask, since Python is already in the picture)
-- [ ] Problem browser page
-  - List available problems
-  - Render problem description from markdown
-- [ ] Solution editor page
-  - Embed Monaco editor (VS Code's editor component) with syntax highlighting
-  - Language selector dropdown
-  - Load solution stub as default content
-  - Save/load solutions to `solutions/` directory
-- [ ] Submission and results
-  - Submit button calls the backend, which invokes the execution engine from Phase 2
-  - Display per-test pass/fail, execution time
-  - Show stdout/stderr output for debugging
-- [ ] Single `docker compose up` or `make run` to start everything
+This is a prototype/intermediate step. It does not need to be production-ready or
+forward-compatible with the eventual hosted version at apps.stephenacomb.com, but the
+API contract between frontend and backend should be designed as if it could be reused.
+
+### Requirements
+
+#### R1. Setup & Environment
+
+- **R1.1**: Starting the workbench requires one command from the repo root (e.g.
+  `python3 -m server` or `make run`).
+- **R1.2**: The only required dependency is Python 3.10+ (already required for the engine).
+  No Node.js, no frontend build step, no additional system packages.
+- **R1.3**: Language-specific toolchains (JDK + Maven for Java) are only required if the
+  user selects that language. Selecting a language whose toolchain is missing produces a
+  clear error, not a crash.
+- **R1.4**: The server runs on `localhost` with a configurable port (default `8000` or
+  similar). Opening the URL in any modern browser lands you on the workbench.
+
+#### R2. Problem Display
+
+- **R2.1**: The problem description is rendered from the existing `problem.md`, converted to
+  formatted HTML. No duplicated or hard-coded problem content in the frontend.
+- **R2.2**: The rendered description includes all sections a solver needs: problem statement,
+  SCF format explanation, examples, constraints, and available utilities.
+- **R2.3**: The description is always visible alongside the editor (split-pane, tab, or
+  scrollable panel — layout TBD). The user should not have to navigate away from the editor
+  to re-read the problem.
+
+#### R3. Language Selection
+
+- **R3.1**: The workbench presents all available languages, auto-discovered from the
+  filesystem (`problems/<problem>/languages/*/runner.json`). Adding a new language directory
+  with valid harness files makes it appear as an option with no server or frontend changes.
+- **R3.2**: Selecting a language loads that language's solution stub into the editor and sets
+  the appropriate syntax highlighting mode.
+- **R3.3**: Switching languages preserves each language's editor state independently. The
+  user can switch between languages without losing work in either.
+
+#### R4. Code Editor
+
+- **R4.1**: The editor uses Monaco (VS Code's editor component) or an equivalent that
+  provides syntax highlighting, bracket matching, and standard keyboard shortcuts
+  (undo/redo, find/replace, etc.).
+- **R4.2**: The editor is pre-filled with the solution stub for the selected language on
+  first load. If a saved solution exists on disk, that is loaded instead.
+- **R4.3**: The editor content is the complete source file the solver would write (e.g. the
+  full `Solution.java` or `solution.py`). No hidden boilerplate or template injection —
+  what the user sees is what gets sent to the engine.
+
+#### R5. Test Execution & Results
+
+- **R5.1**: A "Run" button sends the editor's current code to the backend and displays
+  per-test results.
+- **R5.2**: Results show each test with its verdict (`PASS`, `FAIL`, `TLE`, `MLE`, `RTE`),
+  wall time, and peak memory.
+- **R5.3**: Failed tests show the failure message (assertion detail or error output). This
+  is expandable/collapsible so it doesn't overwhelm the results list.
+- **R5.4**: A summary line shows total passed/failed and aggregate time.
+- **R5.5**: While tests are running, the UI shows a loading/progress state. The UI remains
+  responsive (the run is async). The user can continue reading the problem or editing code
+  while waiting.
+- **R5.6**: Build errors (compilation failures, syntax errors) display the relevant error
+  output clearly, distinguishable from test failures.
+- **R5.7**: Only one run can be in flight at a time. The Run button is disabled while a
+  previous run is executing.
+
+#### R6. Solution Persistence
+
+- **R6.1**: Solutions are saved to a `solutions/` directory in the repo root, organized by
+  problem and language (e.g. `solutions/equivalent-resistance/python/solution.py`). This
+  directory is gitignored by default but users can commit solutions on their own branches.
+- **R6.2**: Saving is explicit — a "Save" button (or Ctrl+S) writes the current editor
+  content to the solutions directory.
+- **R6.3**: On load, if a saved solution exists in `solutions/`, it is loaded into the
+  editor. Otherwise the language's stub is loaded.
+- **R6.4**: A "Reset" action restores the editor to the original solution stub for the
+  current language, with a confirmation prompt. This also deletes the saved file.
+- **R6.5**: The workbench never modifies harness files (`solution.py`/`Solution.java` in
+  the problems directory). All user work goes to `solutions/`.
+
+#### R7. API Contract
+
+- **R7.1**: The backend exposes a small JSON API. At minimum:
+  - `GET /api/problem` — returns problem metadata, rendered description (HTML), and list of
+    available languages with their stubs.
+  - `POST /api/run` — accepts `{language, code}`, returns the engine's structured result
+    (status, per-test verdicts, summary, stdout/stderr).
+  - `GET /api/solution/{language}` — returns the saved solution if one exists, otherwise
+    the stub.
+  - `PUT /api/solution/{language}` — saves solution code to the solutions directory.
+  - `DELETE /api/solution/{language}` — deletes saved solution (reset to stub).
+- **R7.2**: The API is stateless. Each request is self-contained. No sessions, no auth.
+- **R7.3**: The API contract is documented (even if just in code comments or a short spec)
+  so it can inform the future production API.
+
+#### R8. Extensibility
+
+- **R8.1**: Adding a new language requires only adding harness files under
+  `problems/<problem>/languages/<lang>/` (runner.json, stub, tests, utilities). No server
+  or frontend code changes.
+- **R8.2**: Adding or modifying test cases requires only editing `testcases.json`. No server
+  or frontend code changes.
+- **R8.3**: If the problem description (`problem.md`) is updated, the change is reflected on
+  next page load without restarting the server.
+
+#### R9. Out of Scope
+
+These are explicitly not requirements for Phase 3:
+
+- Multiple problems or a problem browser
+- User accounts, authentication, or multi-user support
+- Solution history or versioning (beyond the single saved file per language)
+- Deployment to a remote host
+- Docker or containerized execution
+- Hidden test cases or a "Submit" vs "Run" distinction
+- Mobile or responsive layout (desktop browser is fine)
+- Offline support (localhost is always available)
+
+### Tasks
+
+TBD — to be broken down after requirements are approved and architecture is chosen.
 
 ## Phase 4: Solution & Test Case Management
 
