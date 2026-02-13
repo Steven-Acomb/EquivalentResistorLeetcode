@@ -1,3 +1,7 @@
 # Java build artifacts
 target/
 *.class
+
+# Python build artifacts
+__pycache__/
+*.pyc
