@@ -1,23 +1,67 @@
 # Equivalent Resistor Leetcode
 
-A custom leetcode-style coding challenge platform, starting with an electrical engineering optimization problem: given a set of available resistor values, find the best series/parallel configuration that approximates a target resistance.
+A custom leetcode-style coding challenge platform, starting with an electrical engineering optimization problem.
+
+## The Challenge
+
+When designing circuits, engineers often can't find a single resistor with the exact value they need. Instead, they combine resistors in **series** (resistances add: `Ra + Rb`) and **parallel** (resistances combine: `1/((1/Ra) + (1/Rb))`) to approximate a target value. With a handful of standard resistor values and enough components, you can get surprisingly close to any target — but finding the *best* combination is computationally hard.
+
+**Your task:** Given an array of available resistor values, a maximum number of components, and a target resistance, find the series/parallel configuration that best approximates the target. Return your answer as a string in **Serializable Configuration Format** (SCF), a nested parenthesized notation that encodes both the structure and the components used.
+
+See [`problems/equivalent-resistance/problem.md`](problems/equivalent-resistance/problem.md) for the full problem statement, SCF format spec, examples, and constraints.
+
+## How It Works
+
+Each problem in this repo has:
+- A **problem description** (`problem.md`) with the full specification
+- **Test cases** (`testcases.json`) defining inputs and expected outputs
+- Per-language **harness code** that runs your solution against the tests and reports results
+- A **solution stub** — the one file you edit to write your solution
+
+For the Equivalent Resistance problem, the harness provides a `Solver` interface and a `ResistorUtils` utility class with helper functions (series/parallel math, SCF string builders, and an SCF evaluator). You write a `Solution` class that implements the interface.
+
+## Trying It (Java)
+
+1. Clone the repo
+2. Open `problems/equivalent-resistance/languages/java/src/main/java/com/stephenacomb/Solution.java` — this is the only file you edit
+3. Implement the `approximate()` method
+4. Run the tests:
+
+```bash
+cd problems/equivalent-resistance/languages/java
+mvn test
+```
+
+The test suite runs 8 test cases and reports a score. All tests will fail until you implement a solution — that's expected.
+
+### What's available to your solution
+
+`Solution.java` can use these utilities from `ResistorUtils` (already imported via `import static`):
+
+| Utility | Description |
+|---------|-------------|
+| `series(a, b)` | Returns `a + b` |
+| `parallel(a, b)` | Returns `1/((1/a) + (1/b))` |
+| `evaluateConfig(scf, baseResistances)` | Evaluates an SCF string to a resistance value |
+| `baseScf(index)` | Returns the SCF string for a base resistor at the given index |
+| `combineScf(left, right, op)` | Combines two SCF strings with `"+"` or `"//"` |
 
 ## Project Structure
 
 ```
-problems/                        # Problem definitions
+problems/
   equivalent-resistance/
-    problem.md                   # Full problem description
-    testcases.json               # Language-agnostic test case data
+    problem.md                       # Full problem description
+    testcases.json                   # Language-agnostic test case data
     languages/
-      java/                      # Java Maven project (harness + solution stub)
+      java/                          # Java Maven project
         pom.xml
-        src/
-          main/java/.../
-            Resistor.java              # Series/parallel functions
-            ResistorApproximator.java  # Solution stub + SCF evaluator
-          test/java/.../
-            ResistorApproximatorTest.java  # JUnit test suite
+        src/main/java/.../
+          Solver.java                # Interface defining the contract
+          ResistorUtils.java         # Utility library (series, parallel, SCF helpers)
+          Solution.java              # Your solution goes here
+        src/test/java/.../
+          EquivalentResistanceTest.java  # 8 JUnit test cases
 ```
 
 ## Prerequisites
@@ -79,15 +123,6 @@ brew install maven
    ```bash
    mvn --version
    ```
-
-## Running (Java)
-
-```bash
-cd problems/equivalent-resistance/languages/java
-mvn test
-```
-
-Implement the `approximate()` method in `ResistorApproximator.java` and run the tests to check your solution. See `problems/equivalent-resistance/problem.md` for the full problem statement.
 
 ## Roadmap
 

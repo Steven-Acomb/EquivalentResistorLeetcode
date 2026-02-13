@@ -2,43 +2,44 @@
 
 Local-first leetcode-like platform, all runnable from a single repo clone.
 
-## Phase 0: Repo Restructure
+## Phase 0: Repo Restructure (done)
 
 Reorganize from single-Java-problem layout to a multi-language platform structure.
 
-- [ ] Define a standard problem format (metadata, description, per-language stubs, test cases)
-- [ ] Extract the Equivalent Resistance problem into that format
+- [x] Define a standard problem format (metadata, description, per-language stubs, test cases)
+- [x] Extract the Equivalent Resistance problem into that format
   - Separate problem description (markdown) from code
   - Separate test cases (inputs/expected outputs) from language-specific test harnesses
   - Move Java solution stub and harness into a `languages/java/` subtree
-- [ ] Define a standard solution format (where user solutions live, how they're named)
-- [ ] Create a top-level project structure, e.g.:
+- [x] Define a standard solution format — Option C (interface/contract implementation)
+  - Solver writes a complete file implementing a language-specific interface (e.g. `Solver`)
+  - Harness provides the interface, utilities (`ResistorUtils`), and tests
+  - Solver's file is self-contained and the only file they edit (`Solution.java`)
+  - Utility layer provides series/parallel functions, SCF evaluator, SCF builder helpers
+- [x] Create a top-level project structure:
   ```
   problems/
     equivalent-resistance/
-      description.md
-      testcases.json          # language-agnostic inputs/expected outputs
+      problem.md
+      testcases.json
       languages/
-        java/
-          stub/               # starter code given to solver
-          harness/            # test runner, support code (Resistor.java, etc.)
-        python/
-          stub/
-          harness/
-  solutions/                  # gitignored by default, user work lives here
-    equivalent-resistance/
-      java/
-      python/
+        java/                 # Maven project
+          src/main/java/.../
+            Solver.java       # Interface (contract)
+            ResistorUtils.java # Utilities for solvers
+            Solution.java     # Solver's stub (only file they edit)
+          src/test/java/.../
+            EquivalentResistanceTest.java
   ```
 
 ## Phase 1: Python Support
 
 Add Python as a second supported language for the Equivalent Resistance problem.
 
-- [ ] Port `Resistor.java` functionality to Python (series/parallel functions)
-- [ ] Port `evaluateResistorConfiguration` to Python (SCF parser)
-- [ ] Write Python test harness equivalent to `ResistorApproximatorTest.java`
-- [ ] Create Python solution stub (`approximate` function, returns `"(0)"`)
+- [ ] Port `ResistorUtils` to Python (series, parallel, evaluateConfig, SCF builders)
+- [ ] Create Python `Solver` base class (ABC or duck-typed protocol)
+- [ ] Write Python test harness equivalent to `EquivalentResistanceTest.java`
+- [ ] Create Python `Solution` stub implementing the solver interface
 - [ ] Verify the test cases produce the same expected values across both languages
 
 ## Phase 2: Local Execution Engine

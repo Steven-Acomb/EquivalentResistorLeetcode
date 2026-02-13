@@ -11,9 +11,9 @@ The platform is being built incrementally: local-first development now, eventual
 Phase 0 (repo restructure) is complete. The repo contains:
 
 - **One problem** (Equivalent Resistance) with a full description, test cases, and a Java harness.
-- **Java only** — the solution stub is `ResistorApproximator.approximate()`, the test suite is JUnit 4, built with Maven.
+- **Java only** — the solution stub is `Solution.java`, the test suite is JUnit 4, built with Maven.
 - **No web interface yet** — solutions are tested by running `mvn test` directly.
-- **The `approximate()` method is intentionally unimplemented** — it's the challenge. Don't implement it unless asked.
+- **The `approximate()` method in `Solution.java` is intentionally unimplemented** — it's the challenge. Don't implement it unless asked.
 
 ## Repo Structure
 
@@ -26,10 +26,11 @@ problems/                           # Problem definitions (pure data, no app log
       java/                         # Full Maven project
         pom.xml
         src/main/java/.../
-          Resistor.java             # Series (+) and parallel (//) functions
-          ResistorApproximator.java # SCF evaluator + solution stub
+          Solver.java               # Interface defining the approximate() contract
+          ResistorUtils.java        # Utility library (series, parallel, SCF helpers)
+          Solution.java             # Solver's stub — the only file solvers edit
         src/test/java/.../
-          ResistorApproximatorTest.java  # 8 JUnit test cases
+          EquivalentResistanceTest.java  # 8 JUnit test cases
 ```
 
 Future directories (not yet created):
@@ -60,13 +61,16 @@ This means this project must be:
 ## Key Technical Decisions
 
 - **Problem format**: Each problem has a markdown description, a `testcases.json` with language-agnostic data, and per-language directories containing a harness (support code + test runner) and a stub (starter code for the solver).
+- **Solution format (Option C — interface/contract)**: The solver writes a complete source file that implements a language-specific interface. In Java, `Solution.java` implements `Solver`. The harness provides the interface, utilities, and tests. The solver's file is self-contained, valid on its own, and the only file they edit. No template injection or text substitution — just file placement. The web UI can hide boilerplate visually while the underlying file remains a real, compilable source file.
+- **Utility layer**: Each language provides a `ResistorUtils` (or equivalent) with helper functions solvers can use: `series()`, `parallel()`, `evaluateConfig()`, `baseScf()`, `combineScf()`. These are importable but not part of what the solver writes.
 - **testcases.json**: Some test targets are computed by evaluating a reference SCF config string (indicated by `{"type": "evaluateConfig", "config": "..."}`), others are literal numbers. `"MAX"` represents the language's max float value.
-- **SCF (Serializable Configuration Format)**: A nested parenthesized string format for resistor configurations. `(0)` = base resistor at index 0, `(A)+(B)` = series, `(A)//(B)` = parallel. The evaluator is already implemented in Java.
+- **SCF (Serializable Configuration Format)**: A nested parenthesized string format for resistor configurations. `(0)` = base resistor at index 0, `(A)+(B)` = series, `(A)//(B)` = parallel. The evaluator is implemented in `ResistorUtils`.
 - **Optimal approximation**: Closest equivalent resistance to target (condition 1), using fewest components (condition 2 tiebreaker).
+- **LeetCode as design reference**: We follow LeetCode conventions where practical — all inputs as method params (no constructor state), provided utility types available in scope, solver only sees/edits the relevant code.
 
 ## Conventions
 
 - Keep the problem content (descriptions, test cases) language-agnostic. Language-specific code lives under `languages/<lang>/`.
-- The solver edits files in `stub/` (or in the current Java layout, the `approximate()` method). Everything else is harness.
+- The solver edits `Solution.java` (or language equivalent). Everything else is harness.
 - Build artifacts (`target/`, `__pycache__/`, etc.) should be gitignored.
 - Don't implement the `approximate()` method — that's the challenge for humans to solve.
