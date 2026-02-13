@@ -94,10 +94,11 @@ public class EquivalentResistanceTest {
 				4480, 5040, 5880, 6720, 8400
 				};
 		Solution solution = new Solution();
+		String config = "(20)+((25)//(28))"; // ~= 3733.33 (11200/3)
 		int maxResistors = 3;
-		double expected = 11200.0/3;
+		double expected = ResistorUtils.evaluateConfig(config, baseResistances);
 		double actual = ResistorUtils.evaluateConfig(
-				solution.approximate(baseResistances, Double.MAX_VALUE, maxResistors), baseResistances);
+				solution.approximate(baseResistances, expected, maxResistors), baseResistances);
 		assertEquals(expected, actual, (expected/DELTA));
 		points += 1.0;
 	}
@@ -106,10 +107,11 @@ public class EquivalentResistanceTest {
 	public void test6() {
 		double[] baseResistances = new double[] {1680};
 		Solution solution = new Solution();
+		String config = "(0)+((0)+((0)//((0)//((0)//((0)//((0)+(0)))))))"; // ~= 3733.33 (11200/3)
 		int maxResistors = 8;
-		double expected = 11200.0/3;
+		double expected = ResistorUtils.evaluateConfig(config, baseResistances);
 		double actual = ResistorUtils.evaluateConfig(
-				solution.approximate(baseResistances, Double.MAX_VALUE, maxResistors), baseResistances);
+				solution.approximate(baseResistances, expected, maxResistors), baseResistances);
 		assertEquals(expected, actual, (expected/DELTA));
 		points += 1.0;
 	}
@@ -118,10 +120,11 @@ public class EquivalentResistanceTest {
 	public void test7() {
 		double[] baseResistances = new double[] {13};
 		Solution solution = new Solution();
+		String config = "(0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//(0))))))))))))"; // = 1.0
 		int maxResistors = 13;
-		double expected = 1;
+		double expected = ResistorUtils.evaluateConfig(config, baseResistances);
 		double actual = ResistorUtils.evaluateConfig(
-				solution.approximate(baseResistances, Double.MAX_VALUE, maxResistors), baseResistances);
+				solution.approximate(baseResistances, expected, maxResistors), baseResistances);
 		assertEquals(expected, actual, (expected/DELTA));
 		points += 1.0;
 	}
@@ -130,10 +133,11 @@ public class EquivalentResistanceTest {
 	public void test8() {
 		double[] baseResistances = new double[] {17};
 		Solution solution = new Solution();
+		String config = "((0)//(0))+((0)//((0)+((0)//((0)+((0)//((0)+((0)//(0))))))))"; // = 19.0
 		int maxResistors = 10;
-		double expected = 19;
+		double expected = ResistorUtils.evaluateConfig(config, baseResistances);
 		double actual = ResistorUtils.evaluateConfig(
-				solution.approximate(baseResistances, Double.MAX_VALUE, maxResistors), baseResistances);
+				solution.approximate(baseResistances, expected, maxResistors), baseResistances);
 		assertEquals(expected, actual, (expected/DELTA));
 		points += 1.0;
 	}

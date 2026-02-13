@@ -105,10 +105,11 @@ def test_5():
         4480, 5040, 5880, 6720, 8400,
     ]
     solution = Solution()
+    config = "(20)+((25)//(28))"  # ~= 3733.33 (11200/3)
     max_resistors = 3
-    expected = 11200.0 / 3
+    expected = evaluate_config(config, base_resistances)
     actual = evaluate_config(
-        solution.approximate(base_resistances, float("inf"), max_resistors),
+        solution.approximate(base_resistances, expected, max_resistors),
         base_resistances,
     )
     assert abs(expected - actual) <= expected / DELTA
@@ -119,10 +120,11 @@ def test_6():
     global points
     base_resistances = [1680]
     solution = Solution()
+    config = "(0)+((0)+((0)//((0)//((0)//((0)//((0)+(0)))))))"  # ~= 3733.33 (11200/3)
     max_resistors = 8
-    expected = 11200.0 / 3
+    expected = evaluate_config(config, base_resistances)
     actual = evaluate_config(
-        solution.approximate(base_resistances, float("inf"), max_resistors),
+        solution.approximate(base_resistances, expected, max_resistors),
         base_resistances,
     )
     assert abs(expected - actual) <= expected / DELTA
@@ -133,10 +135,11 @@ def test_7():
     global points
     base_resistances = [13]
     solution = Solution()
+    config = "(0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//(0))))))))))))"  # = 1.0
     max_resistors = 13
-    expected = 1
+    expected = evaluate_config(config, base_resistances)
     actual = evaluate_config(
-        solution.approximate(base_resistances, float("inf"), max_resistors),
+        solution.approximate(base_resistances, expected, max_resistors),
         base_resistances,
     )
     assert abs(expected - actual) <= expected / DELTA
@@ -147,10 +150,11 @@ def test_8():
     global points
     base_resistances = [17]
     solution = Solution()
+    config = "((0)//(0))+((0)//((0)+((0)//((0)+((0)//((0)+((0)//(0))))))))"  # = 19.0
     max_resistors = 10
-    expected = 19
+    expected = evaluate_config(config, base_resistances)
     actual = evaluate_config(
-        solution.approximate(base_resistances, float("inf"), max_resistors),
+        solution.approximate(base_resistances, expected, max_resistors),
         base_resistances,
     )
     assert abs(expected - actual) <= expected / DELTA

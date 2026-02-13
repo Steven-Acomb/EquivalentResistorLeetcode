@@ -60,7 +60,7 @@
     },
     {
       "id": 5,
-      "description": "Custom value set, 3 components, target MAX",
+      "description": "Custom value set, 3 components, approximate 11200/3",
       "baseResistances": [
         336, 420, 480, 560, 630, 672,
         720, 840, 960, 1008, 1050, 1120,
@@ -69,41 +69,41 @@
         2688, 2800, 2940, 3360, 3920, 4200,
         4480, 5040, 5880, 6720, 8400
       ],
-      "targetResistance": "MAX",
+      "targetResistance": { "type": "evaluateConfig", "config": "(20)+((25)//(28))" },
       "maxResistors": 3,
-      "expectedResistance": 3733.3333333333335,
-      "referenceConfig": null,
-      "notes": "Expected is 11200/3. Best achievable with 3 resistors from this set targeting MAX."
+      "expectedResistance": { "type": "evaluateConfig", "config": "(20)+((25)//(28))" },
+      "referenceConfig": "(20)+((25)//(28))",
+      "notes": "Target is 11200/3 (~3733.33). base[20]=2100, base[25]=2800, base[28]=2940. Series of 2100 with parallel of 2800 and 2940."
     },
     {
       "id": 6,
-      "description": "Single base value 1680, 8 components, target MAX",
+      "description": "Single base value 1680, 8 components, approximate 11200/3",
       "baseResistances": [1680],
-      "targetResistance": "MAX",
+      "targetResistance": { "type": "evaluateConfig", "config": "(0)+((0)+((0)//((0)//((0)//((0)//((0)+(0)))))))" },
       "maxResistors": 8,
-      "expectedResistance": 3733.3333333333335,
-      "referenceConfig": null,
-      "notes": "Expected is 11200/3. Same result as test 5 but from a single base value."
+      "expectedResistance": { "type": "evaluateConfig", "config": "(0)+((0)+((0)//((0)//((0)//((0)//((0)+(0)))))))" },
+      "referenceConfig": "(0)+((0)+((0)//((0)//((0)//((0)//((0)+(0)))))))",
+      "notes": "Target is 11200/3 (~3733.33). Achievable with 8 copies of 1680-ohm resistors in a series/parallel configuration."
     },
     {
       "id": 7,
-      "description": "Single base value 13, 13 components, target MAX",
+      "description": "Single base value 13, 13 components, approximate 1 ohm",
       "baseResistances": [13],
-      "targetResistance": "MAX",
+      "targetResistance": 1.0,
       "maxResistors": 13,
-      "expectedResistance": 1.0,
-      "referenceConfig": null,
-      "notes": "13 resistors of 13 ohms. Expected optimal is 1 ohm."
+      "expectedResistance": { "type": "evaluateConfig", "config": "(0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//(0))))))))))))" },
+      "referenceConfig": "(0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//((0)//(0))))))))))))",
+      "notes": "13 resistors of 13 ohms all in parallel = 13/13 = 1 ohm exactly."
     },
     {
       "id": 8,
-      "description": "Single base value 17, 10 components, target MAX",
+      "description": "Single base value 17, 10 components, approximate 19 ohms",
       "baseResistances": [17],
-      "targetResistance": "MAX",
+      "targetResistance": 19.0,
       "maxResistors": 10,
-      "expectedResistance": 19.0,
-      "referenceConfig": null,
-      "notes": "10 resistors of 17 ohms. Expected optimal is 19 ohms."
+      "expectedResistance": { "type": "evaluateConfig", "config": "((0)//(0))+((0)//((0)+((0)//((0)+((0)//((0)+((0)//(0))))))))" },
+      "referenceConfig": "((0)//(0))+((0)//((0)+((0)//((0)+((0)//((0)+((0)//(0))))))))",
+      "notes": "10 resistors of 17 ohms. Series/parallel configuration evaluating to exactly 19 ohms."
     }
   ]
 }
