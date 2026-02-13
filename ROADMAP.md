@@ -44,18 +44,40 @@ Add Python as a second supported language for the Equivalent Resistance problem.
 
 ## Phase 2: Local Execution Engine
 
-A CLI or script that can run a solution against a problem's test cases.
+A Python library + CLI that takes solution source code, a problem, and a language, runs the
+solution against the test harness in an isolated workspace, and returns structured results.
 
-- [ ] Build a runner script (bash or python) that:
-  - Takes a problem name, language, and solution file path
-  - Copies the solution into the appropriate harness
-  - Executes the language-specific test suite (mvn test / pytest)
-  - Captures and parses results (pass/fail per test, execution time)
-  - Returns a structured result (JSON)
+### Requirements
+
+- **Source code in, structured results out**: the engine takes solution text (not a file path),
+  a problem ID, and a language ID. Returns JSON-serializable results. The caller handles
+  I/O (reading files, HTTP bodies, DB records).
+- **Language-agnostic orchestration**: per-language config declares where the solution file goes,
+  what test command to run, and where to find JUnit XML output. Adding a language means adding
+  config, not modifying the engine.
+- **Isolation**: copy the harness to a temp directory, inject the solution, run, discard.
+  Never modify repo files in-place. Supports concurrent runs.
+- **Timeout**: configurable wall-clock timeout per run, reported as a distinct result.
+- **Stateless and idempotent**: no state between runs, same inputs always produce same outputs.
+- **Dual entry point**: callable as a Python function (for the web backend) and as a CLI
+  (for developers). Same core logic.
+- **JUnit XML for result parsing**: Maven/surefire produces it automatically, pytest via
+  `--junitxml` flag. Engine has one XML parser. Score computed engine-side (count passing tests).
+
+### Tasks
+
+- [ ] Define per-language config format (solution file path, test command, JUnit XML location)
+- [ ] Create language configs for Java and Python
+- [ ] Build the core engine (Python library):
+  - Copy harness to temp dir
+  - Inject solution file
+  - Run test command with timeout
+  - Parse JUnit XML output into structured results
+  - Clean up temp dir
+- [ ] Build CLI wrapper (reads a solution file, calls the engine, pretty-prints results)
 - [ ] Docker-based sandboxing (optional for now, nice for consistency)
   - Dockerfiles per language with the needed runtimes
   - `docker-compose.yml` to make it one-command
-- [ ] Measure and report wall-clock time per test case
 
 ## Phase 3: Local Web Interface
 
