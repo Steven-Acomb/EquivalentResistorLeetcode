@@ -1,138 +1,370 @@
-# EquivalentResistorLeetcode
-Test package for my custom Leetcode problem. Please give it a try! 
+# Equivalent Resistor Leetcode
 
-I'd love to see what you come up with.
+A custom leetcode-style coding challenge platform, starting with an electrical engineering optimization problem.
 
-**Background:**
+## The Problem
 
-When designing circuits, we often need to choose components based on parameter values such as resistance/capacitance for resistors/capacitors.
-In many cases however, there don't exist any physical components with the exact, theoretically ideal parameter values we calculate for our designs.
-In therse circumstances, electrical engineers typically solve the problem by taking advantage of the fact that many components such as resistors and 
-capacitors can be connected in configurations which result in them behaving together as if they were a single component with a different parameter value.
-For example, two resistors with resistances A and B can be arranged in series to behave like a single resistor with equivalent resistance Req = Ra + Rb,
-or in parallel to behave like a single resistor with equivalent resistance Req = 1 / ((1/Ra)+(1/Rb)). Capacitors work the same way, except the equations 
-are swapped, with the aforementioned parallel relationship resulting from the capacitors physically connected in series and vice-versa.
+When designing circuits, engineers often can't find a single resistor with the exact value they need. Instead, they combine resistors in **series** and **parallel** to approximate a target value:
 
-Although manufacturers produce components like resistors and capacitors with many different values for their respective parameters, such diversity is expensive. 
-As a result, the industry has settled on a few sets of standard parameter values which have been chosen because they allow engineers to construct a broad range 
-of equivalent components from a small pool of parameter values actually embodied in real, physical ones. This works well in practice, largely thanks to the 
-nature of the equations governing equivalent resistance and capacitance, since you can in theory produce an equivalent component with a parameter value of any 
-rational number, even if you only have a bunch of base components with a single parameter value, so long as that value is rational and you can produce your 
-equivalent with sufficiently many of them. You can even produce equivalent components with irrational equivalent parameter values, so long as the set of base
-parameter values you're working from contains a value of any rational number times that irrational number. (On this note, One thing I personally think you 
-should consider if you want to give this a shot is that relative to their inputs, one function is monatonically increasing and the other decreasing.)
+- **Series**: `Req = Ra + Rb` (resistances add)
+- **Parallel**: `Req = 1 / ((1/Ra) + (1/Rb))` (resistances combine inversely)
 
-In practice of course, engineers have to balance many tradeoffs in their designs, and reproducing an exact equivalent component with some theoretically derived 
-ideal value for your application using an unlimited quantity of base components is generally less cost-effective than producing a close approximate using fewer,
-so we often simply do that instead. This, however, introduces the additional wrinkle of choosing which approximate is best for the application, and how many
-base components is it worth using to produce the desired equivalent. That's a much larger issue than it may sound, as the set of possible equivalents which
-can be produced from a given number of components with parameter values chosen from a given set has a size with a factorial relationship to the number of 
-available base values and the maximum number of actual base components with them we allow for use in producing our equivalent. Knowing how much closer using
-an additional base component would make the approximation's equivalent value to the theoretical ideal is very important for making a good design decision, yet
-it turns out that this is quite time-consuming to calculate.
+These combinations nest — you can put a series pair in parallel with another resistor, and so on. With enough components, you can approximate any target resistance, but finding the *best* combination is computationally hard.
 
-In the past, I have attempted to automate doing this with a script I which calculates the set of possible equivalents and selects the best by brute force with
-some minor optimizations, however as you may guess this approach is unacceptably inefficient for many scenarios. Another issue I ran into is that it's not enough
-to calculate the possible values for the equivalent component, you also have to be able to tell the user how to construct it from the base components.
+### Your task
 
-**The Problem:**
+Write a function that, given:
 
-Given a array of double `baseResistances` representing available base resistance values, an integer `maxResistors` representing the maximum number of components 
-you're allowed to use to produce an equivalent resistor, and a double `resistance` representing a theoretical ideal resistance, return a string which encodes in
-**"serializable configuration format"** a **"configuration"** of base resistors that combine to behave as a equivalent resistor that is an **"optimal approximation"**.
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `baseResistances` | array of floats | Available resistor values (you have unlimited copies of each) |
+| `resistance` | float | Target resistance to approximate (may be `infinity` / `Double.MAX_VALUE`) |
+| `maxResistors` | int | Maximum number of components you can use |
 
-An equivalent resistor is an **"optimal approximation"** if it satisfies all of the following two conditions for the given set of base values and maximum component count:
-1. The difference between the equivalent's resistance and the ideal is the minimum value possible for any equivalent resistor satisfying the constraints.
-2. The equivalent resistor is produced using the minimum number of base resistors possible out of any configuration producing that equivalent resistance value.
+...returns a string in **SCF format** (described below) representing the resistor configuration that is the **optimal approximation** of the target.
 
-For example: given baseResistances = [2, 8], ideal resistance = 4.001, and max components = 2, the two possible equivalent resistors which could be considered to be
-optimal approximations would be a 2 ohm in series with another 2 ohm, e.g. ((0)+(0)) in SCF, and an 8 ohm in parallel with another 8 ohm, e.g. ((1)//(1)) in SCF.
-If the same inputs were given except the ideal was 2.001 instead, then the only optimal approximation would be to just use a single 2 ohm, e.g. (0) in SCF.
+### What "optimal" means
 
-A **"configuration"** is a particular collection of components with specific parameter values and specific arrangement, thus resulting in the whole system behaving
-as a single equivalent instance of that type of component with some equivalent parameter value equal to the result of composing the functions according to the
-arrangement of the base components.
+Your configuration must satisfy two conditions (in priority order):
 
-**"Serializable Configuration Format"** (or SCF) is a format for representing configurations of components as strings. SCF strings consist of a set of nested parentheses,
-each representing an equivalent parameter value, as well as the symbol and inputs of the mathematical function which produces it, if applicable. These inputs are each 
-their own set of nested parentheses, as they themselves represent parameter values encoded in SCF. An SCF string consisting solely of an integer between a single set of
-parentheses represents a base component, particularly an instance of a base component with the parameter values of that at the corresponding index of the 
-array of base components, e.g. baseResistances here. Otherwise, the interior of an SCF string consists of (for this example) two inputs separated by either '//' 
-or '+', representing the resistor parallel and series configurations respectively. 
+1. **Closest value**: The equivalent resistance is as close to the target as possible.
+2. **Fewest components**: Among all configurations that achieve that closest value, yours uses the fewest total resistors (counting each physical resistor, not distinct values — two 1-ohm resistors counts as 2).
 
-For example: given baseResistances = [1, 1.5, 2.7, 4.3, 4.7], the SCF string "((0)//(4))+((3)//(2))" represents an equivalent resistance of about 2.48313, constructed
-by placing an equivalent resistance of about 0.824561 in series to an equivalent resistance of about 1.658571, where the 0.824561 is constructed by placing a base
-resistor of 1 ohm in parallel with a base resistor of 4.7 ohms, and the 1.658571 is constructed by placing a base resistor of 4.3 ohms in parallel with a base 
-resistor of 2.7 ohms.
+### SCF (Serializable Configuration Format)
 
-**Example 1:**
-<pre><strong>Input:</strong> baseResistances = [1, 5, 10], ideal resistance = 3.01, maxResistors = 3
-<strong>Output:</strong> Either "((0)+(0))+(0)" or "(0)+((0)+(0))" will be accepted.
-</pre>
-<strong>Explanation: </strong>It is valid use multiple base resistors of the same value.
-This example is largely to clarify that you are not limited in how many VALUES you use out of those available for 
-your base resistors, nor are you limited in how many base resistors you use of any given value so long as the total 
-number of base resistors you use is equal to or below the value of maxResistors. 
-As such, "(1)" is not an optimal approximation, since as shown above there exists a valid configuration of at most 
-3 base resistors which produces an equivalent resistance (e.g. 3) which is closer to 3.01 ohms than the equivalent
-resistance produced by the lone 5 ohm resistor the configuration "(1)" represents.
+The whole point of this problem is to tell an engineer *how to wire up the resistors* — not just the target value, but which resistors to use and how to connect them. SCF is a string format that encodes exactly that: the structure and components of a resistor configuration, so someone could read it and build the circuit.
 
-If you're still confused, please read Clarification 1.
+| SCF string | Meaning |
+|------------|---------|
+| `0` | A single base resistor — the one at index 0 of `baseResistances` |
+| `3` | A single base resistor at index 3 |
+| `(0)+(1)` | Index 0 in **series** with index 1 |
+| `(0)//(1)` | Index 0 in **parallel** with index 1 |
+| `((0)//(4))+((3)//(2))` | A series combination of two parallel pairs |
 
+The two operators are `+` (series) and `//` (parallel). Nesting builds up complex configurations — the test harness evaluates your SCF string to compute the resulting equivalent resistance.
 
+**Example**: Given `baseResistances = [1, 1.5, 2.7, 4.3, 4.7]`, the SCF string `((0)//(4))+((3)//(2))` means: put a 1-ohm resistor (index 0) in parallel with a 4.7-ohm resistor (index 4) to get ~0.825 ohms, then put a 4.3-ohm resistor (index 3) in parallel with a 2.7-ohm resistor (index 2) to get ~1.659 ohms, then connect those two sub-circuits in series to get ~2.483 ohms.
 
-**Example 2:**
-<pre><strong>Input:</strong> baseResistances = [10, 20], ideal resistance = pi*10, maxResistors = 5
-<strong>Output:</strong> "((1)+((1)//((1)+((0)//(1)))))" or any synonymous SCF string will be accepted.
-</pre>
-<strong>Explanation: </strong>This SCF string represents a configuration of base resistors with equivalent resistance around 3.142857,
-the closest to pi*10 of any possible configuration of at most 5 resistors whose values can each be either 1 or 2 ohms.
-Note: My unit tests directly compute the equivalent resistance represented by your output string, so SCF strings
-representing analogous configurations all work if they use the same equivalent resistance and number of components.
+### Examples
+
+**Example 1** — `baseResistances = [1, 5, 10]`, `resistance = 3.01`, `maxResistors = 3`
+
+Answer: `((0)+(0))+(0)` — three 1-ohm resistors in series = 3 ohms (closest achievable value). You can reuse the same base value as many times as you want, up to `maxResistors` total components.
+
+**Example 2** — `baseResistances = [1, 2]`, `resistance = pi * 10`, `maxResistors = 5`
+
+Answer: `(1)+((1)//((1)+((0)//(1))))` — equivalent resistance ~31.4286, the closest to 10*pi achievable with at most 5 resistors from {1, 2}.
+
+**Example 3** — `baseResistances = [1, 8]`, `resistance = 2.1`, `maxResistors = 4`
+
+Answer: `(0)+(0)` — two 1-ohm resistors in series = 2 ohms. Although `((1)//(1))//((1)//(1))` also produces 2 ohms, it uses 4 resistors. Since 2 resistors achieves the same value, the 4-resistor version is not optimal (violates condition 2).
+
+### Constraints
+
+- Your solution's result must be within **+/- 0.0001%** of the expected equivalent resistance.
+- When `resistance` is infinity (`float('inf')` in Python, `Double.MAX_VALUE` in Java), your goal is to maximize the equivalent resistance.
+- You can use any base resistor value as many times as you want — the only limit is the total component count (`maxResistors`).
+- Your code must be efficient enough to pass the 8 included test cases within the default timeout.
+
+### Hint
+
+Relative to their inputs, one combination function (series) is monotonically increasing and the other (parallel) is monotonically decreasing.
+
+---
+
+## Writing a Solution
+
+You write one file — a `Solution` class that implements a single method. Everything else (test harness, utilities, interface definition) is provided.
+
+### Python
+
+Edit **`problems/equivalent-resistance/languages/python/solution.py`**:
+
+```python
+from solver import Solver
+from resistor_utils import series, parallel, evaluate_config, base_scf, combine_scf
 
 
+class Solution(Solver):
 
-**Example 3:**
-<pre><strong>Input:</strong> baseResistances = [1, 8], ideal resistance = 2.1, maxResistors = 4
-<strong>Output:</strong> "(0)+(0)"
-</pre>
-<strong>Explanation: </strong>Although you can use up to 3 resistors to produce an equivalent, the closest value possible is still 2,
-which you only need two resistors i.e. 1 ohm in series with 1 ohm to produce it. While "((1)//(1))//((1)//(1))" still 
-produces a 2 ohm equivalent resistance, this configuration does not meet condition #2 for qualifying as an optimal 
-approximation as outlined above.
+    def approximate(self, base_resistances, resistance, max_resistors):
+        # Your code here — return an SCF string
+        ...
+```
 
+### Java
 
+Edit **`problems/equivalent-resistance/languages/java/src/main/java/com/stephenacomb/Solution.java`**:
 
-**Constraints:**
-<ul>
-	<li><code>For this example, your solution needn't be extensible to components besides resistors. (1) </code></li>
-	<li><code>Your solution may be within +/- 0.0001% of the unit test to account for variances due to floating point arithmetic.</code></li>
-	<li><code>You can reliably assume that neither array sizes nor output string lengths will exceed Java's limits. </code></li>
-	<li><code>Your code must be efficient enough (at a minimum!) to pass the included tests with the default heap size. </code></li>
-</ul>
+```java
+package com.stephenacomb;
 
-(1) For a followup question or an extra challenge of course, you're highly encouraged to try!
+import static com.stephenacomb.ResistorUtils.*;
 
-**Clarification 1:**
+public class Solution implements Solver {
 
-As a mental image for pure software people, picture standing in front of a cabinet with one drawer for each entry in
-the baseResistances array. Each drawer contains an infinite number of resistors, each resistor having 
-the same resistance as all the others in its drawer, corresponding to that entry.
-(i.e. [1, 5, 10] being a cabinet with 3 drawers, the 1st containing a bunch of 1 ohm resistors, 
-the 2nd having a bunch of 5 ohm resistors, and the 3rd having a bunch of 10 ohm resistors.)
-You are tasked with taking resistors from the cabinet (from any combination of the drawers)
-and sticking them in a breadboard such that the equivalent resistance between two of the terminals is as close
-to 3.01 ohms as you can, given the restrictions that you take at most 3, and only have access to the kinds of 
-resistors which that cabinet has drawers for.
-A "base" resistor is the real, physical object you can take from one of the drawers of the cabinet, 
-while an "equivalent resistor" would be the little circuit you make out of them on the breadboard.
-Since that little circuit electrically behaves as if it were just another kind of resistor with a different 
-resistance value, including the fact that you can make even more elaborate equivalent resistors with them, 
-you can create a wide variety of values by connecting a bunch of them in different ways.
-The restriction in this problem is therefore on how many of those physical "base" resistors you use, 
-not how many types of resistors, and not how many resistance values you use or generate intermediately.
+    public String approximate(double[] baseResistances, double resistance, int maxResistors) {
+        // Your code here — return an SCF string
+        ...
+    }
+}
+```
 
-If you're purely a software person and somehow the description of this problem was challenging for you, please DM me.
+### Available utilities
 
-I have zero clue how I can make this any simpler, so I'd like to hear how you'd describe this problem in your words instead.
+Both languages provide these helper functions (already imported in the stub). Use them to build and evaluate SCF strings:
 
+| Utility | Description | Example |
+|---------|-------------|---------|
+| `series(a, b)` | Returns `a + b` | `series(1.0, 2.0)` = `3.0` |
+| `parallel(a, b)` | Returns `1/((1/a) + (1/b))` | `parallel(3.0, 6.0)` = `2.0` |
+| `base_scf(index)` | Returns the SCF string for a single base resistor | `base_scf(0)` = `"0"` |
+| `combine_scf(left, right, op)` | Combines two SCF strings with `"+"` or `"//"` | `combine_scf("0", "1", "+")` = `"(0)+(1)"` |
+| `evaluate_config(scf, base_resistances)` | Evaluates an SCF string to its equivalent resistance | `evaluate_config("(0)+(1)", [1, 2])` = `3.0` |
+
+Java uses camelCase: `evaluateConfig`, `baseScf`, `combineScf`.
+
+You don't have to use these utilities — you can construct SCF strings however you like, as long as the result is a valid SCF string whose evaluated resistance matches the expected value.
+
+### How tests verify your solution
+
+Each test case calls your `approximate()` method, then evaluates the SCF string you return using `evaluate_config()` to compute the actual equivalent resistance. It then checks that the actual value is within 0.0001% of the expected optimal value. There are 8 test cases total.
+
+---
+
+## Running Tests
+
+### Option A: Problem workbench (recommended)
+
+The workbench is a browser-based interface for reading the problem, writing solutions, and running tests — like a local LeetCode. Start it from the repo root:
+
+```bash
+python3 -m server
+```
+
+Then open `http://127.0.0.1:8000` in your browser. You'll see:
+- **Problem description** on the left (scrollable)
+- **Code editor** (Monaco) on the right with a language selector
+- **Run button** to execute tests — results show per-test verdicts (PASS/FAIL/TLE/MLE/RTE) with time and memory
+- **Save button** (or Ctrl+S) to save your solution to `solutions/` on disk
+- **Reset button** to restore the original stub
+
+Solutions are saved to `solutions/equivalent-resistance/<language>/` (gitignored by default — commit on your own branch to share).
+
+### Option B: Direct test runner
+
+**Python** (requires Python 3.10+ and pytest):
+
+```bash
+cd problems/equivalent-resistance/languages/python
+pip install -r requirements.txt
+pytest -v
+```
+
+**Java** (requires JDK 11+ and Maven):
+
+```bash
+cd problems/equivalent-resistance/languages/java
+mvn test
+```
+
+### Option C: Execution engine CLI
+
+The engine copies the harness to a temp directory, injects your solution file, runs the tests, and shows structured results. Run from the project root (requires Python 3.10+):
+
+**Python:**
+
+```bash
+python3 -m engine run -p equivalent-resistance -l python -s problems/equivalent-resistance/languages/python/solution.py
+```
+
+**Java** (also requires JDK 11+ and Maven):
+
+```bash
+python3 -m engine run -p equivalent-resistance -l java -s problems/equivalent-resistance/languages/java/src/main/java/com/stephenacomb/Solution.java
+```
+
+Add `--json` for machine-readable JSON output, or `--no-per-test` to run all tests in a single batch (faster, but no per-test resource limits or TLE/MLE verdicts).
+
+The engine is useful if you want to test a solution file from anywhere without modifying the repo in-place.
+
+### What to expect
+
+Before you implement anything, all 8 tests will fail — that's expected. The stub returns `base_scf(0)` (just the first base resistor), which is almost never the optimal answer.
+
+By default, each test runs individually with per-test time and memory limits (30s CPU, 256MB RAM). The output shows a verdict and resource usage for each test:
+
+```
+EQUIVALENT-RESISTANCE (python) -- 0/8 passed (2.5s)
+
+  FAIL test_1  (0.3s, 33.0MB)  assert 1.48... <= ...
+  FAIL test_2  (0.3s, 32.6MB)  assert 2.14... <= ...
+  ...
+```
+
+Possible verdicts:
+- **PASS** — correct answer within tolerance
+- **FAIL** — wrong answer or assertion error
+- **TLE** — time limit exceeded (CPU time > 30s)
+- **MLE** — memory limit exceeded (peak RSS > 256MB)
+- **RTE** — runtime error (crash, signal, etc.)
+
+A passing run looks like:
+
+```
+EQUIVALENT-RESISTANCE (python) -- 8/8 passed (1.2s)
+
+  PASS test_1  (0.4s, 35.2MB)
+  PASS test_2  (0.1s, 30.1MB)
+  ...
+```
+
+### Brute-force reference solutions
+
+Each language includes a brute-force example under `examples/`. These solve the problem correctly but are intentionally slow — they demonstrate that test 1 (the large E96 resistor set) requires a smarter algorithm:
+
+**Python:**
+
+```bash
+python3 -m engine run -p equivalent-resistance -l python -s problems/equivalent-resistance/languages/python/examples/brute_force.py
+```
+
+**Java:**
+
+```bash
+python3 -m engine run -p equivalent-resistance -l java -s problems/equivalent-resistance/languages/java/examples/BruteForce.java
+```
+
+You'll see 7/8 tests pass, with test 1 hitting TLE or MLE.
+
+---
+
+## Prerequisites
+
+### Conda environment (recommended)
+
+The easiest way to get all Python dependencies (engine, server, test runner) in one step:
+
+```bash
+conda env create -f environment.yml
+conda activate equivresistor
+```
+
+This creates an environment with Python 3.10+, pytest, FastAPI, and everything else needed. Skip the manual Python setup below if using conda.
+
+### Python (3.10+)
+
+Required for both Python solutions and the execution engine. Only needed if **not** using the conda environment above.
+
+```bash
+python3 --version
+```
+
+Most systems have Python pre-installed. If not, see https://www.python.org/downloads/.
+
+### Java (JDK 11+)
+
+Only required if solving in Java.
+
+```bash
+java --version
+```
+
+If not installed, any JDK distribution works (Temurin, Oracle, etc.). On Ubuntu/Debian:
+
+```bash
+sudo apt install openjdk-17-jdk
+```
+
+On macOS with Homebrew:
+
+```bash
+brew install openjdk@17
+```
+
+### Maven
+
+Only required if solving in Java.
+
+```bash
+mvn --version
+```
+
+If not installed:
+
+**Ubuntu/Debian:**
+
+```bash
+sudo apt install maven
+```
+
+**macOS with Homebrew:**
+
+```bash
+brew install maven
+```
+
+**Manual install (no sudo required):**
+
+1. Download the latest binary archive from https://maven.apache.org/download.cgi (the `apache-maven-X.X.X-bin.tar.gz` link).
+2. Extract it somewhere persistent, e.g.:
+   ```bash
+   tar -xzf apache-maven-*.tar.gz -C ~/tools
+   ```
+3. Add the `bin` directory to your `PATH`. In your `~/.bashrc` or `~/.zshrc`:
+   ```bash
+   export PATH="$HOME/tools/apache-maven-3.9.9/bin:$PATH"
+   ```
+4. Reload your shell (`source ~/.bashrc` or open a new terminal) and verify:
+   ```bash
+   mvn --version
+   ```
+
+---
+
+## Project Structure
+
+```
+engine/                              # Execution engine (Python package)
+  __init__.py                        # Exports run_solution()
+  runner.py                          # Core engine logic
+  junit_xml.py                       # JUnit XML parser
+  __main__.py                        # CLI entry point (python -m engine ...)
+server/                              # Local problem workbench (Python package)
+  __init__.py
+  __main__.py                        # CLI entry point (python -m server)
+  app.py                             # FastAPI app: API + static file serving
+  requirements.txt                   # fastapi, uvicorn, markdown
+  static/
+    index.html                       # Workbench page
+    app.js                           # Frontend logic
+    style.css                        # Custom styling
+problems/
+  equivalent-resistance/
+    problem.md                       # Full problem description
+    testcases.json                   # Language-agnostic test case data
+    languages/
+      java/                          # Java Maven project
+        pom.xml
+        runner.json                  # Engine config
+        src/main/java/.../
+          Solver.java                # Interface defining the contract
+          ResistorUtils.java         # Utility library
+          Solution.java              # Your solution goes here
+        src/test/java/.../
+          EquivalentResistanceTest.java  # 8 JUnit test cases
+      python/
+        runner.json                  # Engine config
+        solver.py                    # ABC defining the contract
+        resistor_utils.py            # Utility library
+        solution.py                  # Your solution goes here
+        test_equivalent_resistance.py  # 8 pytest test cases
+        requirements.txt
+solutions/                           # Your saved solutions (gitignored)
+environment.yml                      # Conda environment
+```
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for the development plan: local web interface, sandboxed execution, and eventual deployment at apps.stephenacomb.com.
