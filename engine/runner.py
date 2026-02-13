@@ -90,6 +90,18 @@ def run_solution(
                 "stderr": (e.stderr or b"").decode(errors="replace") if isinstance(e.stderr, bytes) else (e.stderr or ""),
             }
 
+        # Detect signal-based kills on Unix:
+        # - Without shell: subprocess returns negative (-9 for SIGKILL)
+        # - With shell: shell returns 128 + signal (137 for SIGKILL)
+        if result.returncode < 0 or result.returncode > 128:
+            return {
+                "status": "runtime_error",
+                "tests": [],
+                "summary": _empty_summary(),
+                "stdout": stdout,
+                "stderr": stderr,
+            }
+
         # Find and parse JUnit XML results
         xml_files = glob.glob(os.path.join(work_dir, junit_xml_glob))
 

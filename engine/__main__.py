@@ -60,6 +60,11 @@ def _pretty_print(result: dict, problem: str, language: str):
     if status == "timeout":
         print(f"\n{header} -- TIMEOUT\n")
         print("  The test command exceeded the time limit.")
+    elif status == "runtime_error":
+        print(f"\n{header} -- RUNTIME ERROR (process killed)\n")
+        if result["stderr"]:
+            for line in result["stderr"].strip().splitlines()[-20:]:
+                print(f"  {line}")
     elif status == "build_error":
         print(f"\n{header} -- BUILD ERROR\n")
         if result["stderr"]:
