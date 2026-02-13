@@ -38,6 +38,8 @@ problems/                           # Problem definitions (pure data, no app log
           Solution.java             # Solver's stub — the only file solvers edit
         src/test/java/.../
           EquivalentResistanceTest.java  # 8 JUnit test cases
+        examples/
+          BruteForce.java             # Brute-force reference solution (runnable via engine)
       python/
         runner.json                 # Engine config (solution path, test command, XML glob)
         solver.py                   # ABC defining the approximate() contract
@@ -45,6 +47,8 @@ problems/                           # Problem definitions (pure data, no app log
         solution.py                 # Solver's stub — the only file solvers edit
         test_equivalent_resistance.py  # 8 pytest test cases
         requirements.txt            # pytest
+        examples/
+          brute_force.py              # Brute-force reference solution (runnable via engine)
 ```
 
 Future directories (not yet created):

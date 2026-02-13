@@ -79,6 +79,16 @@ solution against the test harness in an isolated workspace, and returns structur
   - Dockerfiles per language with the needed runtimes
   - `docker-compose.yml` to make it one-command
 
+## Phase 2.5: Test & Engine Hardening
+
+Findings from acid-testing the platform with brute-force solutions in both languages.
+
+- [ ] Fix engine error reporting: detect signal-based kills (SIGKILL/OOM) and report as "RUNTIME ERROR (process killed)" instead of "BUILD ERROR"
+- [ ] Add per-test timeouts: include `pytest-timeout` in Python `requirements.txt` and add `--timeout=30` to runner.json test command; configure Maven Surefire timeout for Java
+- [ ] Reorder tests: move the E96 151-value test (test 1) to the end of the suite so simpler tests run first
+- [ ] Add brute-force examples per language under `problems/.../examples/` with instructions in README for running them via the engine's `-s` flag
+- [ ] Clarify engine workflow in README: make the `-s` flag / engine CLI the recommended way to test solutions (not editing `solution.py`/`Solution.java` directly)
+
 ## Phase 3: Local Web Interface
 
 A locally-hosted webapp for browsing problems, editing code, and submitting solutions.
