@@ -213,9 +213,86 @@ These are explicitly not requirements for Phase 3:
 - Mobile or responsive layout (desktop browser is fine)
 - Offline support (localhost is always available)
 
+### Architecture
+
+- **Backend**: FastAPI + Uvicorn. Single Python process serves both the JSON API and static
+  frontend files. Async-capable, so long-running test executions don't block the server.
+  FastAPI's auto-generated OpenAPI docs satisfy R7.3.
+- **Frontend**: Static HTML/CSS/JS — no build step, no Node.js. One `index.html`, one
+  `app.js`, one `style.css`, served from `server/static/`. All interactivity via vanilla JS
+  and `fetch()` calls to the API.
+- **Editor**: Monaco Editor loaded from CDN (jsDelivr). Provides syntax highlighting,
+  bracket matching, and standard keyboard shortcuts.
+- **CSS**: Pico CSS (classless, from CDN) for typography, buttons, forms, and tables.
+  Custom CSS only for app-specific layout (split panes, results panel, verdict colors).
+- **Markdown rendering**: Server-side via Python `markdown` library. The API returns
+  pre-rendered HTML; the frontend just inserts it.
+- **Package structure**: `server/` directory alongside `engine/`, with `__main__.py` for
+  `python3 -m server` entry point.
+
 ### Tasks
 
-TBD — to be broken down after requirements are approved and architecture is chosen.
+#### T1. Server scaffold & static file serving
+- [ ] Create `server/` package: `__init__.py`, `__main__.py`, `app.py`
+- [ ] FastAPI app with configurable port, static file serving from `server/static/`
+- [ ] `server/requirements.txt` with fastapi, uvicorn, markdown
+- [ ] Placeholder `index.html` that loads Pico CSS and Monaco from CDN
+- [ ] Verify `python3 -m server` starts and serves the placeholder page
+- Satisfies: R1.1, R1.2, R1.4
+
+#### T2. API endpoints
+- [ ] `GET /api/problem` — read `problem.md`, render to HTML via `markdown` library,
+  discover languages from filesystem, return stubs and metadata
+- [ ] `POST /api/run` — accept `{language, code}`, call `engine.run_solution()` in thread
+  pool, return structured result. Return clear error if language toolchain missing (R1.3).
+- [ ] `GET /api/solution/{language}` — return saved solution from `solutions/` if exists,
+  otherwise return the language's stub
+- [ ] `PUT /api/solution/{language}` — write solution to
+  `solutions/<problem>/<language>/<solution_file>`
+- [ ] `DELETE /api/solution/{language}` — delete saved solution file
+- [ ] Add `solutions/` to `.gitignore`
+- Satisfies: R1.3, R6.1, R6.5, R7.1, R7.2, R7.3, R8.1, R8.2, R8.3
+
+#### T3. Frontend: page layout & problem display
+- [ ] Split-pane layout — problem description on the left, editor + results on the right
+- [ ] Fetch `GET /api/problem` on load, render description HTML into left panel
+- [ ] Custom CSS for split-pane, scrollable panels, overall page structure
+- Satisfies: R2.1, R2.2, R2.3
+
+#### T4. Frontend: Monaco editor & language switching
+- [ ] Initialize Monaco editor in the right panel
+- [ ] Language selector dropdown populated from `/api/problem` response
+- [ ] Selecting a language fetches `GET /api/solution/{language}` and loads into editor
+- [ ] Set Monaco language mode based on selection (python, java)
+- [ ] Preserve per-language editor state in memory when switching (unsaved edits kept)
+- Satisfies: R3.1, R3.2, R3.3, R4.1, R4.2, R4.3
+
+#### T5. Frontend: test execution & results
+- [ ] Run button sends `POST /api/run` with current language and editor content
+- [ ] Loading/spinner state while request is in flight; Run button disabled (R5.7)
+- [ ] Results panel below editor showing per-test verdict, time, memory (R5.2)
+- [ ] Summary line: passed/failed count and total time (R5.4)
+- [ ] Expandable/collapsible failure messages (R5.3)
+- [ ] Build error display distinguishable from test failures (R5.6)
+- [ ] Color-coded verdict labels: green PASS, red FAIL, orange TLE, purple MLE, gray RTE
+- Satisfies: R5.1–R5.7
+
+#### T6. Frontend: solution persistence
+- [ ] Save button and Ctrl+S shortcut → `PUT /api/solution/{language}` (R6.2)
+- [ ] On load, `GET /api/solution/{language}` returns saved solution or stub (R6.3)
+- [ ] Reset button with confirmation prompt → `DELETE /api/solution/{language}`, reload
+  stub into editor (R6.4)
+- [ ] Visual indicator of saved/unsaved state (e.g. dot in tab or button label)
+- Satisfies: R6.1–R6.5
+
+#### T7. End-to-end verification
+- [ ] Start server, open browser, complete full workflow in Python (load, edit, run, save,
+  reset)
+- [ ] Repeat in Java (verify setup_command runs, results display correctly)
+- [ ] Verify language auto-discovery (languages appear without code changes)
+- [ ] Verify problem.md changes reflected on reload (R8.3)
+- [ ] Verify missing toolchain produces clear error (R1.3)
+- Satisfies: all requirements verified end-to-end
 
 ## Phase 4: Solution & Test Case Management
 
