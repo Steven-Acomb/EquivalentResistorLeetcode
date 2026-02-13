@@ -72,6 +72,61 @@ You are tasked with taking resistors from the cabinet (from any combination of t
 
 A "base" resistor is the real, physical object you can take from one of the drawers of the cabinet, while an "equivalent resistor" would be the little circuit you make out of them on the breadboard. Since that little circuit electrically behaves as if it were just another kind of resistor with a different resistance value, including the fact that you can make even more elaborate equivalent resistors with them, you can create a wide variety of values by connecting a bunch of them in different ways. The restriction in this problem is therefore on how many of those physical "base" resistors you use, not how many types of resistors, and not how many resistance values you use or generate intermediately.
 
+## Available Utilities
+
+Each language provides a utility library (`resistor_utils` in Python, `ResistorUtils` in Java) with helper functions you can use in your solution. These are already imported in the solution stub.
+
+### `series(a, b)` / `series(double a, double b)`
+
+Computes the equivalent resistance of two resistors in series.
+
+Returns `a + b`.
+
+```
+series(1.0, 2.0)  →  3.0
+series(10.0, 20.0)  →  30.0
+```
+
+### `parallel(a, b)` / `parallel(double a, double b)`
+
+Computes the equivalent resistance of two resistors in parallel.
+
+Returns `1 / (1/a + 1/b)`.
+
+```
+parallel(3.0, 6.0)  →  2.0
+parallel(10.0, 10.0)  →  5.0
+```
+
+### `base_scf(index)` / `baseScf(int index)`
+
+Returns the SCF string for a single base resistor at the given index in `baseResistances`.
+
+```
+base_scf(0)  →  "0"
+base_scf(3)  →  "3"
+```
+
+### `combine_scf(left, right, op)` / `combineScf(String left, String right, String op)`
+
+Combines two SCF strings with a series (`"+"`) or parallel (`"//"`) operator. Wraps each operand in parentheses.
+
+```
+combine_scf("0", "1", "+")    →  "(0)+(1)"
+combine_scf("0", "1", "//")   →  "(0)//(1)"
+combine_scf("(0)+(1)", "2", "//")  →  "((0)+(1))//(2)"
+```
+
+### `evaluate_config(scf, base_resistances)` / `evaluateConfig(String scf, double[] baseResistances)`
+
+Parses an SCF string and computes the equivalent resistance it represents, given an array of base resistance values. This is the same function the test harness uses to verify your answer.
+
+```
+evaluate_config("0", [1, 2])          →  1.0
+evaluate_config("(0)+(1)", [1, 2])    →  3.0
+evaluate_config("(0)//(1)", [3, 6])   →  2.0
+```
+
 ## Hint
 
 Relative to their inputs, one combination function is monotonically increasing and the other is monotonically decreasing.
