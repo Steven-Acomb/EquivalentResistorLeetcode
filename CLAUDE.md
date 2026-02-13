@@ -8,14 +8,14 @@ The platform is being built incrementally: local-first development now, eventual
 
 ## Current State
 
-Phases 0 (repo restructure), 1 (Python support), 2 (local execution engine), and most of 2.5 (engine hardening) are complete. The repo contains:
+Phases 0 (repo restructure), 1 (Python support), 2 (local execution engine), 2.5 (engine hardening), and most of 3 (local workbench) are complete. The repo contains:
 
 - **One problem** (Equivalent Resistance) with a full description, test cases, and harnesses for two languages.
 - **Java and Python** — both have the same Option C structure (interface/ABC, utilities, solution stub, tests).
 - **Execution engine** (`engine/`) — a Python package + CLI that copies a harness to a temp dir, injects a solution, runs tests, parses JUnit XML, and returns structured results. Run via `python3 -m engine run -p <problem> -l <lang> -s <file>`. Also callable as a library via `run_solution()`.
 - **Per-test execution** — by default, the engine runs each test individually with per-test time limits (`RLIMIT_CPU`) and memory monitoring (`/proc` VmHWM polling). Produces verdicts: `passed`, `failed`, `time_limit_exceeded`, `memory_limit_exceeded`, `runtime_error`. Use `--no-per-test` to fall back to batch mode.
 - **Brute-force reference solutions** — under each language's `examples/` directory, runnable via the engine's `-s` flag.
-- **No web interface yet** — solutions are tested by running `mvn test` / `pytest` directly, or via the engine CLI.
+- **Local problem workbench** (`server/`) — a browser-based interface for reading the problem, writing solutions, and running tests. Start with `python3 -m server`, open `http://127.0.0.1:8000`. FastAPI backend serves the API and static frontend (vanilla JS + Monaco editor + Pico CSS). Solutions saved to `solutions/` directory (gitignored).
 - **The `approximate()` method is intentionally unimplemented in both languages** — it's the challenge. Don't implement it unless asked.
 
 ## Repo Structure
@@ -51,13 +51,24 @@ problems/                           # Problem definitions (pure data, no app log
         requirements.txt            # pytest
         examples/
           brute_force.py              # Brute-force reference solution (runnable via engine)
+server/                             # Local problem workbench (Python package)
+  __init__.py
+  __main__.py                       # CLI entry point (python -m server)
+  app.py                            # FastAPI app: API routes + static file serving
+  requirements.txt                  # fastapi, uvicorn, markdown
+  static/
+    index.html                      # Main workbench page
+    app.js                          # Frontend logic (editor, results, persistence)
+    style.css                       # Custom layout and styling
+solutions/                          # User solutions (gitignored, created by workbench)
+  equivalent-resistance/
+    python/solution.py              # Saved Python solution
+    java/Solution.java              # Saved Java solution
+environment.yml                     # Conda environment with all dependencies
 ```
 
 Future directories (not yet created):
-- `frontend/` — Web UI (SPA with Monaco editor)
-- `server/` — API server (serves problems, dispatches execution)
 - `runners/` — Dockerfiles for sandboxed per-language execution
-- `solutions/` — Gitignored directory for local user work
 
 ## How It Fits Into stephenacomb.com
 
@@ -75,7 +86,7 @@ This means this project must be:
 1. ~~Python support~~ (done)
 2. ~~Local execution engine~~ (done) — `engine/` package + CLI
 2.5. ~~Engine hardening~~ (done) — per-test execution, TLE/MLE/RTE verdicts, resource limits, brute-force examples
-3. Local problem workbench (next) — FastAPI backend, static vanilla JS frontend, Monaco editor from CDN, Pico CSS, file-based solution persistence to `solutions/`
+3. ~~Local problem workbench~~ (mostly done) — FastAPI backend, static vanilla JS frontend, Monaco editor from CDN, Pico CSS, file-based solution persistence to `solutions/`. Remaining: end-to-end verification.
 4. Solution & test case management — auto-save, history, test case editor
 5. Scoring & polish — time/memory measurement, difficulty ratings, more languages
 

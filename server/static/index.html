@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem Workbench</title>
+
+    <!-- Pico CSS (classless) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="workbench">
+        <!-- Left panel: problem description -->
+        <div class="panel panel-left">
+            <div class="panel-header">
+                <h2>Problem</h2>
+            </div>
+            <div class="panel-body" id="problem-description">
+                <p>Loading problem description...</p>
+            </div>
+        </div>
+
+        <!-- Right panel: editor + results -->
+        <div class="panel panel-right">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <select id="language-select" aria-label="Language">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <button id="btn-run" class="btn-run">Run</button>
+                    <button id="btn-save" class="btn-save secondary">Save</button>
+                    <button id="btn-reset" class="btn-reset outline secondary">Reset</button>
+                </div>
+            </div>
+
+            <!-- Editor -->
+            <div id="editor-container"></div>
+
+            <!-- Results -->
+            <div id="results-panel" class="results-panel">
+                <div id="results-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monaco Editor from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

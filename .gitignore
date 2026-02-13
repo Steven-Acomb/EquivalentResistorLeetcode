@@ -5,3 +5,6 @@ target/
 # Python build artifacts
 __pycache__/
 *.pyc
+
+# User solutions (saved by workbench)
+solutions/

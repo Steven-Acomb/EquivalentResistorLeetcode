@@ -232,58 +232,58 @@ These are explicitly not requirements for Phase 3:
 
 ### Tasks
 
-#### T1. Server scaffold & static file serving
-- [ ] Create `server/` package: `__init__.py`, `__main__.py`, `app.py`
-- [ ] FastAPI app with configurable port, static file serving from `server/static/`
-- [ ] `server/requirements.txt` with fastapi, uvicorn, markdown
-- [ ] Placeholder `index.html` that loads Pico CSS and Monaco from CDN
-- [ ] Verify `python3 -m server` starts and serves the placeholder page
+#### T1. Server scaffold & static file serving (done)
+- [x] Create `server/` package: `__init__.py`, `__main__.py`, `app.py`
+- [x] FastAPI app with configurable port, static file serving from `server/static/`
+- [x] `server/requirements.txt` with fastapi, uvicorn, markdown
+- [x] Placeholder `index.html` that loads Pico CSS and Monaco from CDN
+- [x] Verify `python3 -m server` starts and serves the placeholder page
+- [x] `environment.yml` conda environment with all dependencies
 - Satisfies: R1.1, R1.2, R1.4
 
-#### T2. API endpoints
-- [ ] `GET /api/problem` — read `problem.md`, render to HTML via `markdown` library,
+#### T2. API endpoints (done)
+- [x] `GET /api/problem` — read `problem.md`, render to HTML via `markdown` library,
   discover languages from filesystem, return stubs and metadata
-- [ ] `POST /api/run` — accept `{language, code}`, call `engine.run_solution()` in thread
+- [x] `POST /api/run` — accept `{language, code}`, call `engine.run_solution()` in thread
   pool, return structured result. Return clear error if language toolchain missing (R1.3).
-- [ ] `GET /api/solution/{language}` — return saved solution from `solutions/` if exists,
+- [x] `GET /api/solution/{language}` — return saved solution from `solutions/` if exists,
   otherwise return the language's stub
-- [ ] `PUT /api/solution/{language}` — write solution to
+- [x] `PUT /api/solution/{language}` — write solution to
   `solutions/<problem>/<language>/<solution_file>`
-- [ ] `DELETE /api/solution/{language}` — delete saved solution file
-- [ ] Add `solutions/` to `.gitignore`
+- [x] `DELETE /api/solution/{language}` — delete saved solution file
+- [x] Add `solutions/` to `.gitignore`
 - Satisfies: R1.3, R6.1, R6.5, R7.1, R7.2, R7.3, R8.1, R8.2, R8.3
 
-#### T3. Frontend: page layout & problem display
-- [ ] Split-pane layout — problem description on the left, editor + results on the right
-- [ ] Fetch `GET /api/problem` on load, render description HTML into left panel
-- [ ] Custom CSS for split-pane, scrollable panels, overall page structure
+#### T3. Frontend: page layout & problem display (done)
+- [x] Split-pane layout — problem description on the left, editor + results on the right
+- [x] Fetch `GET /api/problem` on load, render description HTML into left panel
+- [x] Custom CSS for split-pane, scrollable panels, overall page structure
 - Satisfies: R2.1, R2.2, R2.3
 
-#### T4. Frontend: Monaco editor & language switching
-- [ ] Initialize Monaco editor in the right panel
-- [ ] Language selector dropdown populated from `/api/problem` response
-- [ ] Selecting a language fetches `GET /api/solution/{language}` and loads into editor
-- [ ] Set Monaco language mode based on selection (python, java)
-- [ ] Preserve per-language editor state in memory when switching (unsaved edits kept)
+#### T4. Frontend: Monaco editor & language switching (done)
+- [x] Initialize Monaco editor in the right panel
+- [x] Language selector dropdown populated from `/api/problem` response
+- [x] Selecting a language fetches `GET /api/solution/{language}` and loads into editor
+- [x] Set Monaco language mode based on selection (python, java)
+- [x] Preserve per-language editor state in memory when switching (unsaved edits kept)
 - Satisfies: R3.1, R3.2, R3.3, R4.1, R4.2, R4.3
 
-#### T5. Frontend: test execution & results
-- [ ] Run button sends `POST /api/run` with current language and editor content
-- [ ] Loading/spinner state while request is in flight; Run button disabled (R5.7)
-- [ ] Results panel below editor showing per-test verdict, time, memory (R5.2)
-- [ ] Summary line: passed/failed count and total time (R5.4)
-- [ ] Expandable/collapsible failure messages (R5.3)
-- [ ] Build error display distinguishable from test failures (R5.6)
-- [ ] Color-coded verdict labels: green PASS, red FAIL, orange TLE, purple MLE, gray RTE
+#### T5. Frontend: test execution & results (done)
+- [x] Run button sends `POST /api/run` with current language and editor content
+- [x] Loading/spinner state while request is in flight; Run button disabled (R5.7)
+- [x] Results panel below editor showing per-test verdict, time, memory (R5.2)
+- [x] Summary line: passed/failed count and total time (R5.4)
+- [x] Expandable/collapsible failure messages (R5.3)
+- [x] Build error display distinguishable from test failures (R5.6)
+- [x] Color-coded verdict labels: green PASS, red FAIL, orange TLE, purple MLE, gray RTE
 - Satisfies: R5.1–R5.7
 
-#### T6. Frontend: solution persistence
-- [ ] Save button and Ctrl+S shortcut → `PUT /api/solution/{language}` (R6.2)
-- [ ] On load, `GET /api/solution/{language}` returns saved solution or stub (R6.3)
-- [ ] Reset button with confirmation prompt → `DELETE /api/solution/{language}`, reload
+#### T6. Frontend: solution persistence (done)
+- [x] Save button and Ctrl+S shortcut → `PUT /api/solution/{language}` (R6.2)
+- [x] On load, `GET /api/solution/{language}` returns saved solution or stub (R6.3)
+- [x] Reset button with confirmation prompt → `DELETE /api/solution/{language}`, reload
   stub into editor (R6.4)
-- [ ] Visual indicator of saved/unsaved state (e.g. dot in tab or button label)
-- Satisfies: R6.1–R6.5
+- Satisfies: R6.1–R6.4
 
 #### T7. End-to-end verification
 - [ ] Start server, open browser, complete full workflow in Python (load, edit, run, save,

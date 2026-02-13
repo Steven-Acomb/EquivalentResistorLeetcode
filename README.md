@@ -135,7 +135,24 @@ Each test case calls your `approximate()` method, then evaluates the SCF string 
 
 ## Running Tests
 
-### Option A: Direct test runner
+### Option A: Problem workbench (recommended)
+
+The workbench is a browser-based interface for reading the problem, writing solutions, and running tests — like a local LeetCode. Start it from the repo root:
+
+```bash
+python3 -m server
+```
+
+Then open `http://127.0.0.1:8000` in your browser. You'll see:
+- **Problem description** on the left (scrollable)
+- **Code editor** (Monaco) on the right with a language selector
+- **Run button** to execute tests — results show per-test verdicts (PASS/FAIL/TLE/MLE/RTE) with time and memory
+- **Save button** (or Ctrl+S) to save your solution to `solutions/` on disk
+- **Reset button** to restore the original stub
+
+Solutions are saved to `solutions/equivalent-resistance/<language>/` (gitignored by default — commit on your own branch to share).
+
+### Option B: Direct test runner
 
 **Python** (requires Python 3.10+ and pytest):
 
@@ -152,7 +169,7 @@ cd problems/equivalent-resistance/languages/java
 mvn test
 ```
 
-### Option B: Execution engine
+### Option C: Execution engine CLI
 
 The engine copies the harness to a temp directory, injects your solution file, runs the tests, and shows structured results. Run from the project root (requires Python 3.10+):
 
@@ -225,9 +242,20 @@ You'll see 7/8 tests pass, with test 1 hitting TLE or MLE.
 
 ## Prerequisites
 
+### Conda environment (recommended)
+
+The easiest way to get all Python dependencies (engine, server, test runner) in one step:
+
+```bash
+conda env create -f environment.yml
+conda activate equivresistor
+```
+
+This creates an environment with Python 3.10+, pytest, FastAPI, and everything else needed. Skip the manual Python setup below if using conda.
+
 ### Python (3.10+)
 
-Required for both Python solutions and the execution engine.
+Required for both Python solutions and the execution engine. Only needed if **not** using the conda environment above.
 
 ```bash
 python3 --version
@@ -303,6 +331,15 @@ engine/                              # Execution engine (Python package)
   runner.py                          # Core engine logic
   junit_xml.py                       # JUnit XML parser
   __main__.py                        # CLI entry point (python -m engine ...)
+server/                              # Local problem workbench (Python package)
+  __init__.py
+  __main__.py                        # CLI entry point (python -m server)
+  app.py                             # FastAPI app: API + static file serving
+  requirements.txt                   # fastapi, uvicorn, markdown
+  static/
+    index.html                       # Workbench page
+    app.js                           # Frontend logic
+    style.css                        # Custom styling
 problems/
   equivalent-resistance/
     problem.md                       # Full problem description
@@ -310,20 +347,22 @@ problems/
     languages/
       java/                          # Java Maven project
         pom.xml
-        runner.json                  # Engine config (solution path, test command, XML glob)
+        runner.json                  # Engine config
         src/main/java/.../
           Solver.java                # Interface defining the contract
-          ResistorUtils.java         # Utility library (series, parallel, SCF helpers)
+          ResistorUtils.java         # Utility library
           Solution.java              # Your solution goes here
         src/test/java/.../
           EquivalentResistanceTest.java  # 8 JUnit test cases
       python/
-        runner.json                  # Engine config (solution path, test command, XML glob)
+        runner.json                  # Engine config
         solver.py                    # ABC defining the contract
         resistor_utils.py            # Utility library
         solution.py                  # Your solution goes here
         test_equivalent_resistance.py  # 8 pytest test cases
         requirements.txt
+solutions/                           # Your saved solutions (gitignored)
+environment.yml                      # Conda environment
 ```
 
 ## Roadmap
