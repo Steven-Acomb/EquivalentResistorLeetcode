@@ -32,15 +32,15 @@ Reorganize from single-Java-problem layout to a multi-language platform structur
             EquivalentResistanceTest.java
   ```
 
-## Phase 1: Python Support
+## Phase 1: Python Support (done)
 
 Add Python as a second supported language for the Equivalent Resistance problem.
 
-- [ ] Port `ResistorUtils` to Python (series, parallel, evaluateConfig, SCF builders)
-- [ ] Create Python `Solver` base class (ABC or duck-typed protocol)
-- [ ] Write Python test harness equivalent to `EquivalentResistanceTest.java`
-- [ ] Create Python `Solution` stub implementing the solver interface
-- [ ] Verify the test cases produce the same expected values across both languages
+- [x] Port `ResistorUtils` to Python (`resistor_utils.py`: series, parallel, evaluate_config, base_scf, combine_scf)
+- [x] Create Python `Solver` base class (`solver.py`: ABC with abstract `approximate` method)
+- [x] Write Python test harness (`test_equivalent_resistance.py`: 8 pytest test cases matching Java)
+- [x] Create Python `Solution` stub (`solution.py`: implements Solver, returns `base_scf(0)`)
+- [x] Verify `evaluate_config` produces identical values across Java and Python for all reference configs
 
 ## Phase 2: Local Execution Engine
 

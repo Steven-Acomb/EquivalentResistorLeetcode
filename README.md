@@ -20,7 +20,9 @@ Each problem in this repo has:
 
 For the Equivalent Resistance problem, the harness provides a `Solver` interface and a `ResistorUtils` utility class with helper functions (series/parallel math, SCF string builders, and an SCF evaluator). You write a `Solution` class that implements the interface.
 
-## Trying It (Java)
+## Trying It
+
+### Java
 
 1. Clone the repo
 2. Open `problems/equivalent-resistance/languages/java/src/main/java/com/stephenacomb/Solution.java` — this is the only file you edit
@@ -32,19 +34,34 @@ cd problems/equivalent-resistance/languages/java
 mvn test
 ```
 
-The test suite runs 8 test cases and reports a score. All tests will fail until you implement a solution — that's expected.
+### Python
+
+1. Clone the repo
+2. Open `problems/equivalent-resistance/languages/python/solution.py` — this is the only file you edit
+3. Implement the `approximate()` method
+4. Run the tests:
+
+```bash
+cd problems/equivalent-resistance/languages/python
+pip install -r requirements.txt
+pytest -v
+```
+
+Each test suite runs 8 test cases and reports a score. All tests will fail until you implement a solution — that's expected.
 
 ### What's available to your solution
 
-`Solution.java` can use these utilities from `ResistorUtils` (already imported via `import static`):
+Both languages provide the same utilities (already imported in the stub):
 
 | Utility | Description |
 |---------|-------------|
 | `series(a, b)` | Returns `a + b` |
 | `parallel(a, b)` | Returns `1/((1/a) + (1/b))` |
-| `evaluateConfig(scf, baseResistances)` | Evaluates an SCF string to a resistance value |
-| `baseScf(index)` | Returns the SCF string for a base resistor at the given index |
-| `combineScf(left, right, op)` | Combines two SCF strings with `"+"` or `"//"` |
+| `evaluate_config(scf, base_resistances)` | Evaluates an SCF string to a resistance value |
+| `base_scf(index)` | Returns the SCF string for a base resistor at the given index |
+| `combine_scf(left, right, op)` | Combines two SCF strings with `"+"` or `"//"` |
+
+Java uses camelCase (`evaluateConfig`, `baseScf`, `combineScf`). Python uses snake_case.
 
 ## Project Structure
 
@@ -62,9 +79,25 @@ problems/
           Solution.java              # Your solution goes here
         src/test/java/.../
           EquivalentResistanceTest.java  # 8 JUnit test cases
+      python/
+        solver.py                    # ABC defining the contract
+        resistor_utils.py            # Utility library
+        solution.py                  # Your solution goes here
+        test_equivalent_resistance.py  # 8 pytest test cases
+        requirements.txt
 ```
 
 ## Prerequisites
+
+### Python (3.10+)
+
+Check if you have it:
+
+```bash
+python3 --version
+```
+
+Most systems have Python pre-installed. If not, see https://www.python.org/downloads/.
 
 ### Java (JDK 11+)
 

@@ -8,12 +8,12 @@ The platform is being built incrementally: local-first development now, eventual
 
 ## Current State
 
-Phase 0 (repo restructure) is complete. The repo contains:
+Phases 0 (repo restructure) and 1 (Python support) are complete. The repo contains:
 
-- **One problem** (Equivalent Resistance) with a full description, test cases, and a Java harness.
-- **Java only** — the solution stub is `Solution.java`, the test suite is JUnit 4, built with Maven.
-- **No web interface yet** — solutions are tested by running `mvn test` directly.
-- **The `approximate()` method in `Solution.java` is intentionally unimplemented** — it's the challenge. Don't implement it unless asked.
+- **One problem** (Equivalent Resistance) with a full description, test cases, and harnesses for two languages.
+- **Java and Python** — both have the same Option C structure (interface/ABC, utilities, solution stub, tests).
+- **No web interface yet** — solutions are tested by running `mvn test` (Java) or `pytest` (Python) directly.
+- **The `approximate()` method is intentionally unimplemented in both languages** — it's the challenge. Don't implement it unless asked.
 
 ## Repo Structure
 
@@ -31,6 +31,12 @@ problems/                           # Problem definitions (pure data, no app log
           Solution.java             # Solver's stub — the only file solvers edit
         src/test/java/.../
           EquivalentResistanceTest.java  # 8 JUnit test cases
+      python/
+        solver.py                   # ABC defining the approximate() contract
+        resistor_utils.py           # Utility library (series, parallel, SCF helpers)
+        solution.py                 # Solver's stub — the only file solvers edit
+        test_equivalent_resistance.py  # 8 pytest test cases
+        requirements.txt            # pytest
 ```
 
 Future directories (not yet created):
@@ -52,7 +58,7 @@ This means this project must be:
 ## Development Plan (see ROADMAP.md for details)
 
 0. ~~Repo restructure~~ (done)
-1. Python support — port harness/stub for Equivalent Resistance
+1. ~~Python support~~ (done)
 2. Local execution engine — runner script that takes problem + language + solution, returns results
 3. Local web interface — Monaco editor, problem viewer, submit/results via HTTP API
 4. Solution & test case management — auto-save, history, test case editor
