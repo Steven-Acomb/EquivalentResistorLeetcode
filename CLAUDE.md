@@ -8,16 +8,22 @@ The platform is being built incrementally: local-first development now, eventual
 
 ## Current State
 
-Phases 0 (repo restructure) and 1 (Python support) are complete. The repo contains:
+Phases 0 (repo restructure), 1 (Python support), and 2 (local execution engine) are complete. The repo contains:
 
 - **One problem** (Equivalent Resistance) with a full description, test cases, and harnesses for two languages.
 - **Java and Python** — both have the same Option C structure (interface/ABC, utilities, solution stub, tests).
-- **No web interface yet** — solutions are tested by running `mvn test` (Java) or `pytest` (Python) directly.
+- **Execution engine** (`engine/`) — a Python package + CLI that copies a harness to a temp dir, injects a solution, runs tests, parses JUnit XML, and returns structured results. Run via `python3 -m engine run -p <problem> -l <lang> -s <file>`. Also callable as a library via `run_solution()`.
+- **No web interface yet** — solutions are tested by running `mvn test` / `pytest` directly, or via the engine CLI.
 - **The `approximate()` method is intentionally unimplemented in both languages** — it's the challenge. Don't implement it unless asked.
 
 ## Repo Structure
 
 ```
+engine/                             # Execution engine (Python package)
+  __init__.py                       # Exports run_solution()
+  runner.py                         # Core engine: copy harness, inject solution, run, parse
+  junit_xml.py                      # JUnit XML parser (stdlib only)
+  __main__.py                       # CLI entry point (python -m engine ...)
 problems/                           # Problem definitions (pure data, no app logic)
   equivalent-resistance/
     problem.md                      # Problem description (markdown)
@@ -25,6 +31,7 @@ problems/                           # Problem definitions (pure data, no app log
     languages/
       java/                         # Full Maven project
         pom.xml
+        runner.json                 # Engine config (solution path, test command, XML glob)
         src/main/java/.../
           Solver.java               # Interface defining the approximate() contract
           ResistorUtils.java        # Utility library (series, parallel, SCF helpers)
@@ -32,6 +39,7 @@ problems/                           # Problem definitions (pure data, no app log
         src/test/java/.../
           EquivalentResistanceTest.java  # 8 JUnit test cases
       python/
+        runner.json                 # Engine config (solution path, test command, XML glob)
         solver.py                   # ABC defining the approximate() contract
         resistor_utils.py           # Utility library (series, parallel, SCF helpers)
         solution.py                 # Solver's stub — the only file solvers edit
@@ -59,7 +67,7 @@ This means this project must be:
 
 0. ~~Repo restructure~~ (done)
 1. ~~Python support~~ (done)
-2. Local execution engine — runner script that takes problem + language + solution, returns results
+2. ~~Local execution engine~~ (done) — `engine/` package + CLI
 3. Local web interface — Monaco editor, problem viewer, submit/results via HTTP API
 4. Solution & test case management — auto-save, history, test case editor
 5. Scoring & polish — time/memory measurement, difficulty ratings, more languages

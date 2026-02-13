@@ -42,7 +42,7 @@ Add Python as a second supported language for the Equivalent Resistance problem.
 - [x] Create Python `Solution` stub (`solution.py`: implements Solver, returns `base_scf(0)`)
 - [x] Verify `evaluate_config` produces identical values across Java and Python for all reference configs
 
-## Phase 2: Local Execution Engine
+## Phase 2: Local Execution Engine (done)
 
 A Python library + CLI that takes solution source code, a problem, and a language, runs the
 solution against the test harness in an isolated workspace, and returns structured results.
@@ -66,15 +66,15 @@ solution against the test harness in an isolated workspace, and returns structur
 
 ### Tasks
 
-- [ ] Define per-language config format (solution file path, test command, JUnit XML location)
-- [ ] Create language configs for Java and Python
-- [ ] Build the core engine (Python library):
+- [x] Define per-language config format (solution file path, test command, JUnit XML location)
+- [x] Create language configs for Java and Python
+- [x] Build the core engine (Python library):
   - Copy harness to temp dir
   - Inject solution file
   - Run test command with timeout
   - Parse JUnit XML output into structured results
   - Clean up temp dir
-- [ ] Build CLI wrapper (reads a solution file, calls the engine, pretty-prints results)
+- [x] Build CLI wrapper (reads a solution file, calls the engine, pretty-prints results)
 - [ ] Docker-based sandboxing (optional for now, nice for consistency)
   - Dockerfiles per language with the needed runtimes
   - `docker-compose.yml` to make it one-command

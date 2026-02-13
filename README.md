@@ -34,6 +34,12 @@ cd problems/equivalent-resistance/languages/java
 mvn test
 ```
 
+Or use the execution engine from the project root:
+
+```bash
+python3 -m engine run -p equivalent-resistance -l java -s problems/equivalent-resistance/languages/java/src/main/java/com/stephenacomb/Solution.java
+```
+
 ### Python
 
 1. Clone the repo
@@ -47,7 +53,15 @@ pip install -r requirements.txt
 pytest -v
 ```
 
+Or use the execution engine from the project root:
+
+```bash
+python3 -m engine run -p equivalent-resistance -l python -s problems/equivalent-resistance/languages/python/solution.py
+```
+
 Each test suite runs 8 test cases and reports a score. All tests will fail until you implement a solution — that's expected.
+
+The engine copies the harness to a temp directory, injects your solution, runs the tests, and returns structured results. Add `--json` for machine-readable JSON output.
 
 ### What's available to your solution
 
@@ -66,6 +80,11 @@ Java uses camelCase (`evaluateConfig`, `baseScf`, `combineScf`). Python uses sna
 ## Project Structure
 
 ```
+engine/                              # Execution engine (Python package)
+  __init__.py                        # Exports run_solution()
+  runner.py                          # Core engine logic
+  junit_xml.py                       # JUnit XML parser
+  __main__.py                        # CLI entry point (python -m engine ...)
 problems/
   equivalent-resistance/
     problem.md                       # Full problem description
@@ -73,6 +92,7 @@ problems/
     languages/
       java/                          # Java Maven project
         pom.xml
+        runner.json                  # Engine config (solution path, test command, XML glob)
         src/main/java/.../
           Solver.java                # Interface defining the contract
           ResistorUtils.java         # Utility library (series, parallel, SCF helpers)
@@ -80,6 +100,7 @@ problems/
         src/test/java/.../
           EquivalentResistanceTest.java  # 8 JUnit test cases
       python/
+        runner.json                  # Engine config (solution path, test command, XML glob)
         solver.py                    # ABC defining the contract
         resistor_utils.py            # Utility library
         solution.py                  # Your solution goes here
