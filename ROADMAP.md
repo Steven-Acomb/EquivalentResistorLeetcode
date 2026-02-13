@@ -104,4 +104,3 @@ Niceties for authoring problems and working with solutions.
 - Remote hosting and public access
 - Leaderboards
 - Problem submission by other users
-- AI-assisted hint system
