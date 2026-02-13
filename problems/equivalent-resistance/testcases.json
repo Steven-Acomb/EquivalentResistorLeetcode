@@ -1,0 +1,109 @@
+{
+  "tolerancePercent": 0.0001,
+  "tests": [
+    {
+      "id": 1,
+      "description": "E96 standard series, 4 components, known achievable target",
+      "baseResistances": [
+        1, 1.5, 2.7, 4.3, 4.7, 5.1, 5.6, 6.2, 6.8, 7.5,
+        8.2, 9.1, 10, 11, 12, 13, 15, 16, 18, 20,
+        22, 24, 27, 30, 33, 36, 39, 43, 47, 51,
+        56, 62, 68, 75, 82, 91, 100, 110, 120, 130,
+        150, 160, 180, 200, 220, 240, 270, 300, 330, 360,
+        390, 430, 470, 510, 560, 620, 680, 750, 820, 910,
+        1000, 1100, 1200, 1300, 1500, 1600, 1800, 2000, 2200, 2400,
+        2700, 3000, 3300, 3600, 3900, 4500, 4700, 5100, 5600, 6200,
+        7500, 8200, 9100, 10000, 11000, 12000, 13000, 15000, 16000, 18000,
+        20000, 22000, 24000, 27000, 30000, 33000, 36000, 39000, 43000, 47000,
+        51000, 56000, 62000, 68000, 75000, 82000, 91000, 100000, 110000, 120000,
+        130000, 150000, 160000, 180000, 200000, 220000, 240000, 270000, 300000, 330000,
+        360000, 390000, 430000, 470000, 510000, 560000, 620000, 680000, 750000, 820000, 910000,
+        1000000, 1100000, 1200000, 1300000, 1500000, 1600000, 1800000, 2000000, 2100000, 2200000,
+        2400000, 2700000, 3000000, 3300000, 3600000, 3900000, 4700000, 5600000, 6800000, 8200000,
+        10000000
+      ],
+      "targetResistance": { "type": "evaluateConfig", "config": "((0)//(4))+((3)//(2))" },
+      "maxResistors": 4,
+      "expectedResistance": { "type": "evaluateConfig", "config": "((0)//(4))+((3)//(2))" },
+      "referenceConfig": "((0)//(4))+((3)//(2))",
+      "notes": "Target is the evaluated value of the reference config (~2.48313). Solver must find a config that produces the same equivalent resistance."
+    },
+    {
+      "id": 2,
+      "description": "Two base values, 5 components, pi approximation",
+      "baseResistances": [1, 2],
+      "targetResistance": { "type": "evaluateConfig", "config": "((1)+((1)//((1)+((0)//(1)))))" },
+      "maxResistors": 5,
+      "expectedResistance": { "type": "evaluateConfig", "config": "((1)+((1)//((1)+((0)//(1)))))" },
+      "referenceConfig": "((1)+((1)//((1)+((0)//(1)))))",
+      "notes": "~3.142857 (22/7), the closest to pi achievable with 5 resistors from [1, 2]."
+    },
+    {
+      "id": 3,
+      "description": "Target 0, closest is parallel chain of 1-ohm resistors",
+      "baseResistances": [1, 1000],
+      "targetResistance": 0,
+      "maxResistors": 8,
+      "expectedResistance": 0.125,
+      "referenceConfig": "(0)//((0)//((0)//((0)//((0)//((0)//((0)//(0)))))))",
+      "notes": "8 resistors of 1 ohm all in parallel = 1/8 = 0.125."
+    },
+    {
+      "id": 4,
+      "description": "Target MAX, closest is series chain of largest base value",
+      "baseResistances": [0.1, 1],
+      "targetResistance": "MAX",
+      "maxResistors": 8,
+      "expectedResistance": 8.0,
+      "referenceConfig": "(1)+((1)+((1)+((1)+((1)+((1)+((1)+(1)))))))",
+      "notes": "8 resistors of 1 ohm all in series = 8."
+    },
+    {
+      "id": 5,
+      "description": "Custom value set, 3 components, target MAX",
+      "baseResistances": [
+        336, 420, 480, 560, 630, 672,
+        720, 840, 960, 1008, 1050, 1120,
+        1200, 1260, 1344, 1400, 1440, 1680,
+        1960, 2016, 2100, 2240, 2352, 2520,
+        2688, 2800, 2940, 3360, 3920, 4200,
+        4480, 5040, 5880, 6720, 8400
+      ],
+      "targetResistance": "MAX",
+      "maxResistors": 3,
+      "expectedResistance": 3733.3333333333335,
+      "referenceConfig": null,
+      "notes": "Expected is 11200/3. Best achievable with 3 resistors from this set targeting MAX."
+    },
+    {
+      "id": 6,
+      "description": "Single base value 1680, 8 components, target MAX",
+      "baseResistances": [1680],
+      "targetResistance": "MAX",
+      "maxResistors": 8,
+      "expectedResistance": 3733.3333333333335,
+      "referenceConfig": null,
+      "notes": "Expected is 11200/3. Same result as test 5 but from a single base value."
+    },
+    {
+      "id": 7,
+      "description": "Single base value 13, 13 components, target MAX",
+      "baseResistances": [13],
+      "targetResistance": "MAX",
+      "maxResistors": 13,
+      "expectedResistance": 1.0,
+      "referenceConfig": null,
+      "notes": "13 resistors of 13 ohms. Expected optimal is 1 ohm."
+    },
+    {
+      "id": 8,
+      "description": "Single base value 17, 10 components, target MAX",
+      "baseResistances": [17],
+      "targetResistance": "MAX",
+      "maxResistors": 10,
+      "expectedResistance": 19.0,
+      "referenceConfig": null,
+      "notes": "10 resistors of 17 ohms. Expected optimal is 19 ohms."
+    }
+  ]
+}

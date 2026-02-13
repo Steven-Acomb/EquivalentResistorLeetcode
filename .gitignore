@@ -1,0 +1,3 @@
+# Java build artifacts
+target/
+*.class
