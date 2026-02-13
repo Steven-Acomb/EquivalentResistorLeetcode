@@ -83,11 +83,11 @@ solution against the test harness in an isolated workspace, and returns structur
 
 Findings from acid-testing the platform with brute-force solutions in both languages.
 
-- [ ] Fix engine error reporting: detect signal-based kills (SIGKILL/OOM) and report as "RUNTIME ERROR (process killed)" instead of "BUILD ERROR"
-- [ ] Add per-test timeouts: include `pytest-timeout` in Python `requirements.txt` and add `--timeout=30` to runner.json test command; configure Maven Surefire timeout for Java
+- [x] Fix engine error reporting: detect signal-based kills (SIGKILL/OOM) and report as "RUNTIME ERROR (process killed)" instead of "BUILD ERROR"
+- [x] Per-test execution with resource limits: engine runs each test individually with `RLIMIT_CPU` time limits and `/proc`-based memory monitoring. Produces distinct verdicts: `passed`, `failed`, `time_limit_exceeded` (`TLE`), `memory_limit_exceeded` (`MLE`), `runtime_error` (`RTE`). Limits defined in `testcases.json` (language-agnostic), enforced by the engine. `--no-per-test` flag falls back to batch mode. Supersedes earlier language-specific timeout approach (pytest-timeout / Surefire timeout).
 - [ ] Reorder tests: move the E96 151-value test (test 1) to the end of the suite so simpler tests run first
-- [ ] Add brute-force examples per language under `problems/.../examples/` with instructions in README for running them via the engine's `-s` flag
-- [ ] Clarify engine workflow in README: make the `-s` flag / engine CLI the recommended way to test solutions (not editing `solution.py`/`Solution.java` directly)
+- [x] Add brute-force examples per language under `problems/.../examples/` with instructions in README for running them via the engine's `-s` flag
+- [x] Clarify engine workflow in README: document per-test output format, verdicts (TLE/MLE/RTE), `--no-per-test` flag, and brute-force examples
 
 ## Phase 3: Local Web Interface
 
@@ -124,8 +124,8 @@ Niceties for authoring problems and working with solutions.
 
 ## Phase 5: Scoring & Polish
 
-- [ ] Time complexity scoring (compare against reference benchmarks per problem)
-- [ ] Memory usage measurement and reporting
+- [ ] Time complexity scoring (compare against reference benchmarks per problem; per-test wall time and peak memory already reported by the engine)
+- [ ] Memory usage measurement and reporting (basic peak-RSS tracking done; JVM memory tracking limited to Maven parent process until Docker sandboxing)
 - [ ] Per-problem difficulty ratings
 - [ ] Cleaner results UI (progress bars, color-coded pass/fail, expandable test details)
 - [ ] Support for additional languages (JS/TS, C++, Go, etc. — each just needs a harness + Dockerfile)

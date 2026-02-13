@@ -20,6 +20,10 @@ def main():
     run_parser.add_argument("-s", "--solution", required=True, help="Path to solution file")
     run_parser.add_argument("--json", action="store_true", dest="json_output", help="Output raw JSON")
     run_parser.add_argument("--timeout", type=int, default=120, help="Timeout in seconds")
+    run_parser.add_argument(
+        "--no-per-test", action="store_true", dest="no_per_test",
+        help="Run all tests in a single batch instead of individually",
+    )
 
     args = parser.parse_args()
 
@@ -39,6 +43,7 @@ def main():
         language=args.language,
         solution_code=solution_code,
         timeout=args.timeout,
+        per_test=not args.no_per_test,
     )
 
     if args.json_output:
@@ -79,14 +84,39 @@ def _pretty_print(result: dict, problem: str, language: str):
         for test in result["tests"]:
             name = test["name"]
             t = test["time_seconds"]
-            if test["passed"]:
-                print(f"  PASS {name}  ({t}s)")
+
+            # Per-test mode (has "verdict" field)
+            if "verdict" in test:
+                verdict = test["verdict"]
+                mem = test.get("memory_mb", 0)
+                msg = test.get("message") or ""
+
+                _VERDICT_LABELS = {
+                    "passed": "PASS",
+                    "failed": "FAIL",
+                    "time_limit_exceeded": "TLE ",
+                    "memory_limit_exceeded": "MLE ",
+                    "runtime_error": "RTE ",
+                }
+                label = _VERDICT_LABELS.get(verdict, verdict.upper())
+
+                if verdict == "passed":
+                    print(f"  {label} {name}  ({t}s, {mem}MB)")
+                else:
+                    if len(msg) > 120:
+                        msg = msg[:117] + "..."
+                    suffix = f"  {msg}" if msg else ""
+                    print(f"  {label} {name}  ({t}s, {mem}MB){suffix}")
+
+            # Batch mode (has "passed" field)
             else:
-                msg = test.get("message", "")
-                # Truncate long messages
-                if len(msg) > 120:
-                    msg = msg[:117] + "..."
-                print(f"  FAIL {name}  ({t}s)  {msg}")
+                if test["passed"]:
+                    print(f"  PASS {name}  ({t}s)")
+                else:
+                    msg = test.get("message", "")
+                    if len(msg) > 120:
+                        msg = msg[:117] + "..."
+                    print(f"  FAIL {name}  ({t}s)  {msg}")
 
     print()
 

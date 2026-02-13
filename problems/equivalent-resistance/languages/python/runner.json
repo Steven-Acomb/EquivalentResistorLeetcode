@@ -1,5 +1,7 @@
 {
   "solution_file": "solution.py",
   "test_command": "pytest --junitxml=results.xml -v",
-  "junit_xml_glob": "results.xml"
+  "junit_xml_glob": "results.xml",
+  "setup_command": null,
+  "single_test_command": "pytest --junitxml=results.xml -v test_equivalent_resistance.py::test_{test_id}"
 }

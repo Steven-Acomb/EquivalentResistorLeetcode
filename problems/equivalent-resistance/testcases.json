@@ -1,5 +1,9 @@
 {
   "tolerancePercent": 0.0001,
+  "limits": {
+    "time_seconds": 30,
+    "memory_mb": 256
+  },
   "tests": [
     {
       "id": 1,

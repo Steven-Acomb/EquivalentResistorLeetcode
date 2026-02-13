@@ -168,21 +168,58 @@ python3 -m engine run -p equivalent-resistance -l python -s problems/equivalent-
 python3 -m engine run -p equivalent-resistance -l java -s problems/equivalent-resistance/languages/java/src/main/java/com/stephenacomb/Solution.java
 ```
 
-Add `--json` for machine-readable JSON output.
+Add `--json` for machine-readable JSON output, or `--no-per-test` to run all tests in a single batch (faster, but no per-test resource limits or TLE/MLE verdicts).
 
 The engine is useful if you want to test a solution file from anywhere without modifying the repo in-place.
 
 ### What to expect
 
-Before you implement anything, all 8 tests will fail — that's expected. The stub returns `base_scf(0)` (just the first base resistor), which is almost never the optimal answer. A passing run looks like:
+Before you implement anything, all 8 tests will fail — that's expected. The stub returns `base_scf(0)` (just the first base resistor), which is almost never the optimal answer.
+
+By default, each test runs individually with per-test time and memory limits (30s CPU, 256MB RAM). The output shows a verdict and resource usage for each test:
 
 ```
-EQUIVALENT-RESISTANCE (python) -- 8/8 passed (0.05s)
+EQUIVALENT-RESISTANCE (python) -- 0/8 passed (2.5s)
 
-  PASS test_1  (0.01s)
-  PASS test_2  (0.003s)
+  FAIL test_1  (0.3s, 33.0MB)  assert 1.48... <= ...
+  FAIL test_2  (0.3s, 32.6MB)  assert 2.14... <= ...
   ...
 ```
+
+Possible verdicts:
+- **PASS** — correct answer within tolerance
+- **FAIL** — wrong answer or assertion error
+- **TLE** — time limit exceeded (CPU time > 30s)
+- **MLE** — memory limit exceeded (peak RSS > 256MB)
+- **RTE** — runtime error (crash, signal, etc.)
+
+A passing run looks like:
+
+```
+EQUIVALENT-RESISTANCE (python) -- 8/8 passed (1.2s)
+
+  PASS test_1  (0.4s, 35.2MB)
+  PASS test_2  (0.1s, 30.1MB)
+  ...
+```
+
+### Brute-force reference solutions
+
+Each language includes a brute-force example under `examples/`. These solve the problem correctly but are intentionally slow — they demonstrate that test 1 (the large E96 resistor set) requires a smarter algorithm:
+
+**Python:**
+
+```bash
+python3 -m engine run -p equivalent-resistance -l python -s problems/equivalent-resistance/languages/python/examples/brute_force.py
+```
+
+**Java:**
+
+```bash
+python3 -m engine run -p equivalent-resistance -l java -s problems/equivalent-resistance/languages/java/examples/BruteForce.java
+```
+
+You'll see 7/8 tests pass, with test 1 hitting TLE or MLE.
 
 ---
 
