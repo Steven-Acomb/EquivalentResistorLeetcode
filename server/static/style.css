@@ -1,3 +1,21 @@
+/* ---- Theme colors ---- */
+
+:root, [data-theme="light"] {
+    --verdict-passed: #2e7d32;
+    --verdict-failed: #c62828;
+    --verdict-tle: #e65100;
+    --verdict-mle: #6a1b9a;
+    --verdict-rte: #616161;
+}
+
+[data-theme="dark"] {
+    --verdict-passed: #66bb6a;
+    --verdict-failed: #ef5350;
+    --verdict-tle: #ffa726;
+    --verdict-mle: #ce93d8;
+    --verdict-rte: #bdbdbd;
+}
+
 /* ---- Layout ---- */
 
 html, body {
@@ -78,6 +96,12 @@ html, body {
     width: auto;
 }
 
+.btn-theme {
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0.25rem 0.5rem;
+}
+
 /* ---- Editor ---- */
 
 #editor-container {
@@ -117,26 +141,26 @@ html, body {
     min-width: 3rem;
 }
 
-.verdict-passed { color: #2e7d32; }
-.verdict-failed { color: #c62828; }
-.verdict-tle    { color: #e65100; }
-.verdict-mle    { color: #6a1b9a; }
-.verdict-rte    { color: #616161; }
+.verdict-passed { color: var(--verdict-passed); }
+.verdict-failed { color: var(--verdict-failed); }
+.verdict-tle    { color: var(--verdict-tle); }
+.verdict-mle    { color: var(--verdict-mle); }
+.verdict-rte    { color: var(--verdict-rte); }
 
 .result-meta {
-    color: #666;
+    color: var(--pico-muted-color);
     font-size: 0.8rem;
 }
 
 .result-detail {
-    color: #888;
+    color: var(--pico-secondary);
     font-size: 0.8rem;
     padding-left: 3.6rem;
     padding-bottom: 0.1rem;
 }
 
 .result-message {
-    color: #888;
+    color: var(--pico-secondary);
     font-size: 0.8rem;
     padding-left: 3.6rem;
     cursor: pointer;
@@ -151,13 +175,13 @@ html, body {
 }
 
 .results-error {
-    color: #c62828;
+    color: var(--verdict-failed);
     white-space: pre-wrap;
     font-size: 0.85rem;
 }
 
 .results-loading {
-    color: #666;
+    color: var(--pico-muted-color);
     font-style: italic;
 }
 
