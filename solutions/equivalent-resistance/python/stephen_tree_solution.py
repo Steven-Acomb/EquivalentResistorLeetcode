@@ -1,5 +1,5 @@
+from resistor_utils import base_scf, combine_scf, evaluate_config, parallel, series
 from solver import Solver
-from resistor_utils import series, parallel, evaluate_config, base_scf, combine_scf
 
 
 class Solution(Solver):
@@ -14,3 +14,6 @@ class Solution(Solver):
         #   base_scf(index)                         — returns the SCF string for a base resistor
         #   combine_scf(left, right, op)            — combines two SCF strings with "+" or "//"
         return base_scf(0)
+
+
+# python3 -m engine run -p equivalent-resistance -l python -s solutions/equivalent-resistance/python/stephen_tree_solution.py
