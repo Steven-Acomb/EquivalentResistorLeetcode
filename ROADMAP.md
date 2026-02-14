@@ -294,6 +294,11 @@ These are explicitly not requirements for Phase 3:
 - [ ] Verify missing toolchain produces clear error (R1.3)
 - Satisfies: all requirements verified end-to-end
 
+## Phase 3.5: UI Polish
+
+- [x] Dark mode toggle — theme switcher persisted via localStorage, switches Pico CSS
+  data-theme, Monaco editor theme, and custom verdict colors between light and dark variants
+
 ## Phase 4: Solution & Test Case Management
 
 Niceties for authoring problems and working with solutions.

@@ -1,9 +1,33 @@
+// ---- Theme ----
+
+function getTheme() {
+    return localStorage.getItem('theme') || 'dark';
+}
+
+function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    const btn = document.getElementById('btn-theme');
+    if (btn) btn.textContent = theme === 'dark' ? '\u2600' : '\u263E';
+    if (editor) {
+        monaco.editor.setTheme(theme === 'dark' ? 'vs-dark' : 'vs');
+    }
+}
+
+function toggleTheme() {
+    const next = getTheme() === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    applyTheme(next);
+}
+
 // ---- State ----
 
 let editor = null;
 let problemData = null;
 let currentLanguage = null;
 let running = false;
+
+// Apply theme immediately (before Monaco loads) to avoid flash
+applyTheme(getTheme());
 
 // Per-language editor content (in-memory, survives language switching)
 const editorState = {};
@@ -39,7 +63,7 @@ require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(document.getElementById('editor-container'), {
         value: '',
         language: 'python',
-        theme: 'vs',
+        theme: getTheme() === 'dark' ? 'vs-dark' : 'vs',
         minimap: { enabled: false },
         automaticLayout: true,
         fontSize: 14,
@@ -301,6 +325,7 @@ document.getElementById('language-select').addEventListener('change', function (
 document.getElementById('btn-run').addEventListener('click', runTests);
 document.getElementById('btn-save').addEventListener('click', saveSolution);
 document.getElementById('btn-reset').addEventListener('click', resetSolution);
+document.getElementById('btn-theme').addEventListener('click', toggleTheme);
 
 // ---- Utilities ----
 
