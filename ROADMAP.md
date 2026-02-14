@@ -86,7 +86,7 @@ Findings from acid-testing the platform with brute-force solutions in both langu
 - [x] Fix engine error reporting: detect signal-based kills (SIGKILL/OOM) and report as "RUNTIME ERROR (process killed)" instead of "BUILD ERROR"
 - [x] Per-test execution with resource limits: engine runs each test individually with `RLIMIT_CPU` time limits and `/proc`-based memory monitoring. Produces distinct verdicts: `passed`, `failed`, `time_limit_exceeded` (`TLE`), `memory_limit_exceeded` (`MLE`), `runtime_error` (`RTE`). Limits defined in `testcases.json` (language-agnostic), enforced by the engine. `--no-per-test` flag falls back to batch mode. Supersedes earlier language-specific timeout approach (pytest-timeout / Surefire timeout).
 - [x] ~~Reorder tests~~ — no longer needed: per-test execution isolates each test in its own subprocess, so a TLE/MLE on test 1 doesn't block the rest
-- [x] Add brute-force examples per language under `problems/.../examples/` with instructions in README for running them via the engine's `-s` flag
+- [x] Add brute-force examples per language under `solutions/` with instructions in README for running them via the engine's `-s` flag
 - [x] Clarify engine workflow in README: document per-test output format, verdicts (TLE/MLE/RTE), `--no-per-test` flag, and brute-force examples
 
 ## Phase 3: Local Problem Workbench
@@ -164,8 +164,7 @@ API contract between frontend and backend should be designed as if it could be r
 #### R6. Solution Persistence
 
 - **R6.1**: Solutions are saved to a `solutions/` directory in the repo root, organized by
-  problem and language (e.g. `solutions/equivalent-resistance/python/solution.py`). This
-  directory is gitignored by default but users can commit solutions on their own branches.
+  problem and language (e.g. `solutions/equivalent-resistance/python/solution.py`).
 - **R6.2**: Saving is explicit — a "Save" button (or Ctrl+S) writes the current editor
   content to the solutions directory.
 - **R6.3**: On load, if a saved solution exists in `solutions/`, it is loaded into the
@@ -251,7 +250,7 @@ These are explicitly not requirements for Phase 3:
 - [x] `PUT /api/solution/{language}` — write solution to
   `solutions/<problem>/<language>/<solution_file>`
 - [x] `DELETE /api/solution/{language}` — delete saved solution file
-- [x] Add `solutions/` to `.gitignore`
+- [x] Create `solutions/` directory structure
 - Satisfies: R1.3, R6.1, R6.5, R7.1, R7.2, R7.3, R8.1, R8.2, R8.3
 
 #### T3. Frontend: page layout & problem display (done)
@@ -298,6 +297,8 @@ These are explicitly not requirements for Phase 3:
 
 - [x] Dark mode toggle — theme switcher persisted via localStorage, switches Pico CSS
   data-theme, Monaco editor theme, and custom verdict colors between light and dark variants
+- [x] Native file picker for Save — uses File System Access API (showSaveFilePicker)
+  with IndexedDB handle persistence; falls back to backend save on unsupported browsers
 
 ## Phase 4: Solution & Test Case Management
 

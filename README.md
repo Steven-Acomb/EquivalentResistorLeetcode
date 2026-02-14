@@ -147,10 +147,11 @@ Then open `http://127.0.0.1:8000` in your browser. You'll see:
 - **Problem description** on the left (scrollable)
 - **Code editor** (Monaco) on the right with a language selector
 - **Run button** to execute tests — results show per-test verdicts (PASS/FAIL/TLE/MLE/RTE) with time and memory
-- **Save button** (or Ctrl+S) to save your solution to `solutions/` on disk
+- **Save button** (or Ctrl+S) to save your solution — on Chromium, opens a native OS file dialog (subsequent saves write silently to the same file); on other browsers, saves to `solutions/` via the backend
 - **Reset button** to restore the original stub
+- **Dark mode toggle** (persisted across sessions)
 
-Solutions are saved to `solutions/equivalent-resistance/<language>/` (gitignored by default — commit on your own branch to share).
+Solutions are saved to `solutions/equivalent-resistance/<language>/`.
 
 ### Option B: Direct test runner
 
@@ -222,18 +223,18 @@ EQUIVALENT-RESISTANCE (python) -- 8/8 passed (1.2s)
 
 ### Brute-force reference solutions
 
-Each language includes a brute-force example under `examples/`. These solve the problem correctly but are intentionally slow — they demonstrate that test 1 (the large E96 resistor set) requires a smarter algorithm:
+Each language includes a brute-force reference solution under `solutions/`. These solve the problem correctly but are intentionally slow — they demonstrate that test 1 (the large E96 resistor set) requires a smarter algorithm:
 
 **Python:**
 
 ```bash
-python3 -m engine run -p equivalent-resistance -l python -s problems/equivalent-resistance/languages/python/examples/brute_force.py
+python3 -m engine run -p equivalent-resistance -l python -s solutions/equivalent-resistance/python/brute_force.py
 ```
 
 **Java:**
 
 ```bash
-python3 -m engine run -p equivalent-resistance -l java -s problems/equivalent-resistance/languages/java/examples/BruteForce.java
+python3 -m engine run -p equivalent-resistance -l java -s solutions/equivalent-resistance/java/BruteForce.java
 ```
 
 You'll see 7/8 tests pass, with test 1 hitting TLE or MLE.
@@ -361,7 +362,7 @@ problems/
         solution.py                  # Your solution goes here
         test_equivalent_resistance.py  # 8 pytest test cases
         requirements.txt
-solutions/                           # Your saved solutions (gitignored)
+solutions/                           # Brute-force references + your saved solutions
 environment.yml                      # Conda environment
 ```
 

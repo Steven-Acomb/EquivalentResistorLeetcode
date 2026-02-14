@@ -32,6 +32,15 @@ applyTheme(getTheme());
 // Per-language editor content (in-memory, survives language switching)
 const editorState = {};
 
+// ---- File System Access API (native save) ----
+
+const fileHandles = {};                              // per-language FileSystemFileHandle
+const HAS_FILE_PICKER = 'showSaveFilePicker' in window;
+const FILE_TYPES = {
+    python: [{ description: 'Python files', accept: { 'text/x-python': ['.py'] } }],
+    java:   [{ description: 'Java files',   accept: { 'text/x-java-source': ['.java'] } }],
+};
+
 // Monaco language mode mapping
 const MONACO_LANG = {
     python: 'python',
@@ -278,7 +287,116 @@ function renderResults(result) {
     el.innerHTML = html;
 }
 
+// ---- IndexedDB helpers (for persisting file handles across reloads) ----
+
+function openIDB() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open('workbench', 1);
+        req.onupgradeneeded = () => {
+            req.result.createObjectStore('fileHandles');
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+    });
+}
+
+async function storeHandle(lang, handle) {
+    try {
+        const db = await openIDB();
+        const tx = db.transaction('fileHandles', 'readwrite');
+        tx.objectStore('fileHandles').put(handle, lang);
+        await new Promise((res, rej) => { tx.oncomplete = res; tx.onerror = rej; });
+    } catch (e) {
+        console.warn('Failed to persist file handle:', e);
+    }
+}
+
+async function loadHandle(lang) {
+    try {
+        const db = await openIDB();
+        const tx = db.transaction('fileHandles', 'readonly');
+        const req = tx.objectStore('fileHandles').get(lang);
+        return new Promise((resolve) => {
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+        });
+    } catch (e) {
+        return null;
+    }
+}
+
+async function removeHandle(lang) {
+    try {
+        const db = await openIDB();
+        const tx = db.transaction('fileHandles', 'readwrite');
+        tx.objectStore('fileHandles').delete(lang);
+    } catch (e) {
+        // non-fatal
+    }
+}
+
+// ---- Native file save (File System Access API) ----
+
+function getSuggestedFilename(lang) {
+    if (!problemData) return null;
+    const langData = problemData.languages.find(l => l.name === lang);
+    if (!langData || !langData.solution_file) return null;
+    // Extract basename: "src/main/java/.../Solution.java" → "Solution.java"
+    return langData.solution_file.split('/').pop();
+}
+
+async function nativeSave(lang, code) {
+    // 1. Check in-memory handle
+    let handle = fileHandles[lang] || null;
+
+    // 2. Try restoring from IndexedDB
+    if (!handle) {
+        handle = await loadHandle(lang);
+    }
+
+    // 3. Verify permission on existing handle
+    if (handle) {
+        let perm = await handle.queryPermission({ mode: 'readwrite' });
+        if (perm === 'prompt') {
+            perm = await handle.requestPermission({ mode: 'readwrite' });
+        }
+        if (perm !== 'granted') {
+            handle = null; // permission denied — fall through to picker
+        }
+    }
+
+    // 4. No valid handle — open the picker
+    if (!handle) {
+        const suggestedName = getSuggestedFilename(lang) || 'solution';
+        handle = await window.showSaveFilePicker({
+            suggestedName,
+            types: FILE_TYPES[lang] || [],
+        });
+    }
+
+    // 5. Write the file
+    const writable = await handle.createWritable();
+    await writable.write(code);
+    await writable.close();
+
+    // 6. Cache and persist handle
+    fileHandles[lang] = handle;
+    await storeHandle(lang, handle);
+}
+
 // ---- Solution persistence ----
+
+async function backendSave(lang, code, btn) {
+    try {
+        await api('PUT', '/api/solution/' + lang, { code });
+        editorState[lang] = code;
+        btn.textContent = 'Saved!';
+        setTimeout(() => { btn.textContent = 'Save'; }, 1500);
+    } catch (e) {
+        btn.textContent = 'Error';
+        setTimeout(() => { btn.textContent = 'Save'; }, 1500);
+    }
+}
 
 async function saveSolution() {
     if (!currentLanguage) return;
@@ -286,14 +404,22 @@ async function saveSolution() {
     const code = editor.getValue();
     const btn = document.getElementById('btn-save');
 
-    try {
-        await api('PUT', '/api/solution/' + currentLanguage, { code });
-        editorState[currentLanguage] = code;
-        btn.textContent = 'Saved!';
-        setTimeout(() => { btn.textContent = 'Save'; }, 1500);
-    } catch (e) {
-        btn.textContent = 'Error';
-        setTimeout(() => { btn.textContent = 'Save'; }, 1500);
+    if (HAS_FILE_PICKER) {
+        try {
+            await nativeSave(currentLanguage, code);
+            editorState[currentLanguage] = code;
+            btn.textContent = 'Saved!';
+            setTimeout(() => { btn.textContent = 'Save'; }, 1500);
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                // User cancelled the picker — do nothing
+                return;
+            }
+            console.warn('Native save failed, falling back to backend:', e);
+            await backendSave(currentLanguage, code, btn);
+        }
+    } else {
+        await backendSave(currentLanguage, code, btn);
     }
 }
 
@@ -308,6 +434,10 @@ async function resetSolution() {
     } catch (e) {
         // Ignore delete errors — stub fallback still works
     }
+
+    // Clear native file handle so next save reopens picker
+    delete fileHandles[currentLanguage];
+    await removeHandle(currentLanguage);
 
     // Reload stub
     const langData = problemData.languages.find(l => l.name === currentLanguage);
