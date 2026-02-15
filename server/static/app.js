@@ -84,6 +84,11 @@ require(['vs/editor/editor.main'], function () {
         saveSolution();
     });
 
+    // Override Ctrl+O to load
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyO, function () {
+        loadSolution();
+    });
+
     loadProblem();
 });
 
@@ -384,6 +389,84 @@ async function nativeSave(lang, code) {
     await storeHandle(lang, handle);
 }
 
+// ---- Native file load (File System Access API) ----
+
+function getAcceptExtensions(lang) {
+    const types = FILE_TYPES[lang];
+    if (!types || !types[0]) return '';
+    const exts = Object.values(types[0].accept).flat();
+    return exts.join(',');
+}
+
+async function nativeLoad(lang) {
+    const handle = await window.showOpenFilePicker({
+        types: FILE_TYPES[lang] || [],
+        multiple: false,
+    });
+    const fileHandle = handle[0];
+    const file = await fileHandle.getFile();
+    const text = await file.text();
+
+    // Cache handle so next Save writes back to this file
+    fileHandles[lang] = fileHandle;
+    await storeHandle(lang, fileHandle);
+
+    return text;
+}
+
+function fallbackLoad(lang) {
+    return new Promise((resolve, reject) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = getAcceptExtensions(lang);
+        input.addEventListener('change', () => {
+            const file = input.files[0];
+            if (!file) { reject(new Error('No file selected')); return; }
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsText(file);
+        });
+        input.click();
+    });
+}
+
+async function loadSolution() {
+    if (!currentLanguage) return;
+
+    const btn = document.getElementById('btn-load');
+    let text = null;
+
+    if (HAS_FILE_PICKER) {
+        try {
+            text = await nativeLoad(currentLanguage);
+        } catch (e) {
+            if (e.name === 'AbortError') return; // user cancelled
+            console.warn('Native load failed, falling back to file input:', e);
+            try {
+                text = await fallbackLoad(currentLanguage);
+            } catch (e2) {
+                console.warn('Fallback load also failed:', e2);
+                return;
+            }
+        }
+    } else {
+        try {
+            text = await fallbackLoad(currentLanguage);
+        } catch (e) {
+            console.warn('File load failed:', e);
+            return;
+        }
+    }
+
+    if (text !== null) {
+        editor.setValue(text);
+        editorState[currentLanguage] = text;
+        btn.textContent = 'Loaded!';
+        setTimeout(() => { btn.textContent = 'Load'; }, 1500);
+    }
+}
+
 // ---- Solution persistence ----
 
 async function backendSave(lang, code, btn) {
@@ -454,6 +537,7 @@ document.getElementById('language-select').addEventListener('change', function (
 
 document.getElementById('btn-run').addEventListener('click', runTests);
 document.getElementById('btn-save').addEventListener('click', saveSolution);
+document.getElementById('btn-load').addEventListener('click', loadSolution);
 document.getElementById('btn-reset').addEventListener('click', resetSolution);
 document.getElementById('btn-theme').addEventListener('click', toggleTheme);
 
