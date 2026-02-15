@@ -13,6 +13,7 @@ from resistor_utils import base_scf, combine_scf, evaluate_config, parallel, ser
 
 BASE_RESISTANCES = [1]
 MAX_RESISTORS = 10
+# This is OEIS https://oeis.org/A048211
 
 
 def generate_all_configs(base_resistances, max_resistors):
@@ -131,7 +132,7 @@ def print_counts(configs, topos):
     for n in sorted(configs.keys()):
         for _, v, _ in configs[n]:
             cumulative.add(v)
-        t = topos.get(n, '?')
+        t = topos.get(n, "?")
         v = len(configs[n])
         print(f"  {n:>3}  {t:>12}  {v:>16}  {len(cumulative):>18}")
 
