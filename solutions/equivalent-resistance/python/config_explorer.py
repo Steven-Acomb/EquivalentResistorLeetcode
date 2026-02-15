@@ -14,6 +14,8 @@ from resistor_utils import base_scf, combine_scf, evaluate_config, parallel, ser
 BASE_RESISTANCES = [1]
 MAX_RESISTORS = 10
 # This is OEIS https://oeis.org/A048211
+# also see: https://oeis.org/A174283
+# also see: https://oeis.org/A337516
 
 
 def generate_all_configs(base_resistances, max_resistors):
