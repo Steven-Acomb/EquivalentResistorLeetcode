@@ -39,24 +39,54 @@ The algorithm passes tests where the optimal is a linear chain but fails when br
 
 ## Configuration Space: How Big Is It?
 
+### Two fundamentally different configuration spaces
+
+There are two levels to this problem that must not be conflated:
+
+1. **Series-parallel configurations** — circuits that can be recursively decomposed into two
+   sub-circuits combined with series or parallel. These are exactly the circuits representable as
+   binary trees (and expressible in SCF format). The recursive decomposition IS the definition of
+   series-parallel, so `config_explorer.py`'s recursive enumeration is provably complete for this
+   class.
+
+2. **General configurations** — arbitrary 2-connected graphs with resistors as edges. This
+   includes bridges (Wheatstone bridge, etc.) and other topologies that have no series-parallel
+   decomposition. A graph is series-parallel if and only if it has no K4 (complete graph on 4
+   nodes) as a minor. Graphs with K4 minors require Kirchhoff's laws or delta-wye transforms to
+   evaluate — `series()` and `parallel()` cannot express them.
+
+Enumerating all series-parallel topologies is straightforward (recursive construction). Enumerating
+all general 2-connected graphs on n edges is a significantly harder graph theory problem — you
+can't just recurse on sub-circuits because non-series-parallel graphs don't decompose that way.
+See [Gottlieb](https://cs.nyu.edu/~gottlieb/tr/overflow/2003-oct-3-more.html) for discussion.
+
+### Series-parallel counts (from config_explorer.py)
+
 For n identical 1-ohm resistors (series-parallel only):
 
-| n  | topologies | distinct values | cumulative values |
-|----|-----------|-----------------|-------------------|
-| 1  | 1         | 1               | 1                 |
-| 2  | 2         | 2               | 3                 |
-| 3  | 8         | 4               | 7                 |
-| 4  | 40        | 9               | 15                |
-| 5  | 224       | 24              | 37                |
-| 6  | 1344      | 55              | 83                |
-| 7  | 8448      | 147             | 205               |
-| 8  | 54912     | 384             | 502               |
-| 9  | 366080    | 995             | 1234              |
-| 10 | 2489344   | 2618            | 3081              |
+| n  | topologies (upper bound) | distinct values | cumulative values |
+|----|-------------------------|-----------------|-------------------|
+| 1  | 1                       | 1               | 1                 |
+| 2  | 2                       | 2               | 3                 |
+| 3  | 8                       | 4               | 7                 |
+| 4  | 40                      | 9               | 15                |
+| 5  | 224                     | 24              | 37                |
+| 6  | 1344                    | 55              | 83                |
+| 7  | 8448                    | 147             | 205               |
+| 8  | 54912                   | 384             | 502               |
+| 9  | 366080                  | 995             | 1234              |
+| 10 | 2489344                 | 2618            | 3081              |
 
-- Topologies grow ~4^n (number of full binary trees with n leaves × 2 operator choices per node).
-- Distinct values grow much slower due to commutativity and value collisions.
-- OEIS A048211: distinct resistances from n identical resistors, series-parallel only.
+- "Topologies (upper bound)" counts ordered labeled binary trees — overcounts because it treats
+  `series(A, B)` and `series(B, A)` as distinct. True structurally distinct count is lower.
+- "Distinct values" is the real count — deduplicated by resistance value. Matches OEIS A048211.
+- Topologies grow ~4^n; distinct values grow ~2.55^n.
+
+### Where they diverge
+
+The general case (A174283) first diverges from series-parallel (A048211) at n=5, where bridge
+configurations add 1 extra achievable resistance value. The gap grows with n. The smallest
+non-planar circuit requires 8 resistors.
 
 ---
 

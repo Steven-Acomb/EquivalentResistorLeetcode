@@ -1,8 +1,25 @@
 """
-Scratchpad for exploring all possible resistor configurations.
+Scratchpad for exploring all possible SERIES-PARALLEL resistor configurations.
 
-Generates every distinct configuration of up to N identical resistors,
-showing how each was built from smaller sub-configurations.
+Generates every distinct series-parallel configuration of up to N identical
+resistors, showing how each was built from smaller sub-configurations.
+
+IMPORTANT: This only enumerates series-parallel configurations — circuits that
+can be recursively decomposed into two sub-circuits combined with series or
+parallel. This is COMPLETE for series-parallel (that recursive decomposition is
+the *definition* of series-parallel), but it MISSES non-series-parallel
+topologies such as:
+  - Wheatstone bridge circuits (minimum 5 resistors)
+  - Any circuit whose graph has K4 (complete graph on 4 nodes) as a minor
+
+A series-parallel graph is exactly one with no K4 minor. Non-series-parallel
+circuits require Kirchhoff's laws or delta-wye transforms to evaluate and
+cannot be represented in SCF format.
+
+For the full picture (all 2-connected graphs, not just series-parallel), see:
+  - OEIS A174283 (includes bridges, diverges from series-parallel at n=5)
+  - OEIS A337516 (general configurations including bridge + fork)
+  - Gottlieb: https://cs.nyu.edu/~gottlieb/tr/overflow/2003-oct-3-more.html
 
 Usage:
     PYTHONPATH=problems/equivalent-resistance/languages/python \
@@ -12,16 +29,20 @@ Usage:
 from resistor_utils import base_scf, combine_scf, evaluate_config, parallel, series
 
 BASE_RESISTANCES = [1]
-MAX_RESISTORS = 10
+MAX_RESISTORS = 5
+# PYTHONPATH=problems/equivalent-resistance/languages/python python /home/stephenacomb/Documents/Github_Projects/EquivalentResistorLeetcode/solutions/equivalent-resistance/python/config_explorer.py
+
 # This is OEIS https://oeis.org/A048211
 # also see: https://oeis.org/A174283
 # also see: https://oeis.org/A337516
 # all: https://oeis.org/A337517
+# also all? https://oeis.org/A180414
+# https://cs.nyu.edu/~gottlieb/tr/overflow/2003-oct-3-more.html
 
 
 def generate_all_configs(base_resistances, max_resistors):
     """
-    Build all possible configurations level by level.
+    Build all possible SERIES-PARALLEL configurations level by level.
 
     Returns a dict: configs[n] = list of (scf, value, description) tuples
     for configurations using exactly n resistors.
@@ -30,6 +51,11 @@ def generate_all_configs(base_resistances, max_resistors):
       - A single base resistor (n=1), or
       - Two sub-configurations combined with series or parallel (n>1),
         where the left uses k resistors and the right uses n-k.
+
+    This recursive decomposition is the definition of a series-parallel circuit,
+    so this enumeration is COMPLETE for series-parallel but does not produce any
+    non-series-parallel topologies (bridges, etc.). The distinct value counts
+    match OEIS A048211 for the single-base-resistance case.
     """
     configs = {}
 
@@ -104,14 +130,18 @@ def print_summary(configs):
 
 def count_topologies(max_resistors):
     """
-    Count the number of distinct circuit topologies (tree shape × operator
-    assignment) for exactly n identical resistors.
+    Count the number of distinct SERIES-PARALLEL circuit topologies (tree shape
+    × operator assignment) for exactly n identical resistors.
 
-    A topology is a full binary tree with n leaves, where each internal node
-    is labeled series or parallel. Two topologies that differ only by swapping
-    the children of a commutative operator are counted separately here (upper
-    bound) — the distinct VALUE count from generate_all_configs is the real
-    measure of how many meaningfully different configurations exist.
+    A topology here is a full binary tree with n leaves, where each internal
+    node is labeled series or parallel. Two topologies that differ only by
+    swapping the children of a commutative operator are counted separately
+    (making this an upper bound on structurally distinct series-parallel
+    topologies).
+
+    This does NOT count non-series-parallel topologies (bridges, etc.) which
+    are not representable as binary trees. Enumerating those requires
+    enumerating 2-connected graphs — a harder graph theory problem.
     """
     # topo[n] = number of distinct topologies with exactly n resistors
     topo = {1: 1}
