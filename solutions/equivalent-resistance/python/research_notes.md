@@ -56,9 +56,26 @@ There are two levels to this problem that must not be conflated:
    evaluate — `series()` and `parallel()` cannot express them.
 
 Enumerating all series-parallel topologies is straightforward (recursive construction). Enumerating
-all general 2-connected graphs on n edges is a significantly harder graph theory problem — you
-can't just recurse on sub-circuits because non-series-parallel graphs don't decompose that way.
-See [Gottlieb](https://cs.nyu.edu/~gottlieb/tr/overflow/2003-oct-3-more.html) for discussion.
+all general topologies is a significantly harder graph theory problem — you can't just recurse on
+sub-circuits because non-series-parallel graphs don't decompose that way.
+See [Gottlieb/Karnofsky](https://cs.nyu.edu/~gottlieb/tr/overflow/2003-oct-3-more.html) for
+discussion.
+
+### Defining the general topology space (work in progress)
+
+Karnofsky's formulation models each resistor as an edge and adds a distinguished "battery" edge
+connecting the two terminals. This turns any valid resistor network into a 2-connected graph: even
+a simple series chain becomes 2-connected once the battery edge closes the loop. In this model, a
+network of n resistors = a 2-connected graph on n+1 edges with one distinguished (battery) edge.
+
+This must be a **multigraph** (allowing multiple edges between the same vertex pair), since
+parallel resistors sharing both endpoints are multiple edges between two nodes.
+
+So the candidate enumeration space is: **all 2-connected multigraphs on n+1 edges, with one
+distinguished edge, up to isomorphism preserving the distinguished edge.**
+
+*This definition is still a work in progress — it's not yet clear whether this is exactly the
+right formulation or whether additional constraints are needed. More reading and thought required.*
 
 ### Series-parallel counts (from config_explorer.py)
 
