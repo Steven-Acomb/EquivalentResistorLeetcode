@@ -55,6 +55,25 @@ class Solution(Solver):
             return a < b
         return abs(a - target) < abs(b - target)
 
+    def cw_path_to_scf(self, cw_path, index):
+        """
+        Convert a Calkin-Wilf tree path to an SCF string.
+
+        In the Calkin-Wilf tree, the root represents a single base resistor.
+        Each step adds one more base resistor:
+          - L (left child)  = put current equivalent in parallel with a base resistor
+          - R (right child) = put current equivalent in series with a base resistor
+
+        This directly builds the resistor configuration string.
+        """
+        scf = base_scf(index)
+        for step in cw_path:
+            if step == "R":
+                scf = combine_scf(scf, base_scf(index), "+")
+            else:
+                scf = combine_scf(scf, base_scf(index), "//")
+        return scf
+
     def approximate(self, base_resistances, resistance, max_resistors):
         # TODO: Implement your solution here.
         #
@@ -79,10 +98,14 @@ class Solution(Solver):
         # 3. The Calkin–Wilf tree has the same numbers each layer as the Stern–Brocot tree but the way it's structured actually corresponds to the values produced by
         #       single-resistance series/parallel connections. There's a correspondance that we should be able to do which takes the position of a node in the
         #       Stern–Brocot tree and finds the corresponding position in the Calkin–Wilf tree in minimal time. Do so for our nearest value from step 2.
+        best_path_cw = best_path[::-1]
+        print("best_path_cw = ", best_path_cw)
         # 4. Since the series/parallel combinations for our one resistor type are encoded in the Calkin–Wilf tree, we should be able to use our position to find the
         #       SCF string for our nearest value. Do so and return that SCF string.
+        best_scf = self.cw_path_to_scf(cw_path=best_path_cw, index=0)
+        print("best_scf = ", best_scf)
 
-        return base_scf(0)
+        return best_scf
 
 
 # python3 -m engine run -p equivalent-resistance -l python -s solutions/equivalent-resistance/python/stephen_tree_solution.py
@@ -90,9 +113,9 @@ class Solution(Solver):
 # python3 -m server
 # PYTHONPATH=problems/equivalent-resistance/languages/python python solutions/equivalent-resistance/python/stephen_tree_solution.py
 
-solution = Solution()
-base_resistances = [2]
-resistance = (2 / 3 - 0.01) * 2
-max_resistors = 4
-solution.approximate(base_resistances, resistance, max_resistors)
-print("done")
+# solution = Solution()
+# base_resistances = [2]
+# resistance = (2 / 3 - 0.01) * 2
+# max_resistors = 4
+# solution.approximate(base_resistances, resistance, max_resistors)
+# print("done")
