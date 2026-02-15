@@ -299,6 +299,9 @@ These are explicitly not requirements for Phase 3:
   data-theme, Monaco editor theme, and custom verdict colors between light and dark variants
 - [x] Native file picker for Save — uses File System Access API (showSaveFilePicker)
   with IndexedDB handle persistence; falls back to backend save on unsupported browsers
+- [x] Load button — uses File System Access API (showOpenFilePicker) on Chromium with
+  fallback to `<input type="file">` on other browsers; loaded file handle is cached so
+  subsequent saves write back to the same file
 
 ## Phase 4: Solution & Test Case Management
 
