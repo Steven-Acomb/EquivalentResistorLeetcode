@@ -75,14 +75,21 @@ class Solution(Solver):
         return scf
 
     def approximate(self, base_resistances, resistance, max_resistors):
-        # TODO: Implement your solution here.
+        # KNOWN LIMITATION: This algorithm only finds optimal configurations that are
+        # "linear chains" — where each step combines the entire previous circuit with
+        # one new base resistor (i.e. Calkin-Wilf tree paths). It misses "branching"
+        # configurations that split the resistor budget between two independent
+        # sub-circuits and then combine them.
         #
-        # Available utilities (from resistor_utils):
-        #   series(a, b)                            — returns a + b
-        #   parallel(a, b)                          — returns 1 / (1/a + 1/b)
-        #   evaluate_config(scf, base_resistances)  — evaluates an SCF string to a resistance value
-        #   base_scf(index)                         — returns the SCF string for a base resistor
-        #   combine_scf(left, right, op)            — combines two SCF strings with "+" or "//"
+        # Example: 19/17 has continued fraction [1, 8, 2] (sum=11), so the CW chain
+        # needs 11 resistors. But a branching configuration achieves it in 10:
+        #   series(parallel(17,17), <8-resistor sub-circuit>) = series(8.5, 10.5) = 19
+        # Both sub-circuits are themselves linear CW chains, but the top-level split
+        # is not representable as a single CW path.
+        #
+        # This means the algorithm is incomplete even for the len(base_resistances)==1
+        # case. It passes tests where the optimal is a linear chain (tests 3, 4, 6, 7)
+        # but fails test 8 where a branching configuration beats the best linear chain.
 
         # Current version of algorithm only works for the len(base_resistances) == 1 case.
         if len(base_resistances) != 1:
