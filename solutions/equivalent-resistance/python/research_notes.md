@@ -97,9 +97,106 @@ problem statement.
 
 ---
 
+## Computational Complexity: What's Known
+
+### The short answer
+**There is no published formal complexity classification for this exact problem.** The specific
+question — "given a target resistance, a set of base values, and a budget n, find the
+series-parallel configuration of at most n resistors that minimizes the approximation error" — does
+not appear in the complexity theory literature. It is an open question.
+
+### Evidence it's hard
+- The configuration space grows exponentially (~2.55^n for distinct values, ~4^n for topologies).
+- Several closely related graph resistance optimization problems ARE proven NP-hard:
+  - Network design for s-t effective resistance (Chan et al. 2022)
+  - Optimal node elimination ordering in resistor networks
+  - Minimizing total effective graph resistance by adding links
+
+### Evidence there's exploitable structure
+- Continued fractions provide a polynomial-time heuristic that often works well (the SB/CW
+  approach we built). Khan (2014) explicitly connects unit resistor ladder networks to CF
+  approximation.
+- Fibonacci numbers bound the achievable rationals: for n unit resistors, any achievable p/q has
+  p, q ≤ F(n+1) ≈ φ^n (Khan 2010).
+- **Chan et al. (2022) found an FPTAS** (fully polynomial-time approximation scheme) for the
+  network design variant specifically on **series-parallel graphs**. So the series-parallel
+  restriction does make things more tractable.
+- The Farey sequence / Stern-Brocot / continued fraction connections are real and used in the
+  literature (Khan 2012, Isokawa 2016).
+
+### The most relevant paper
+Johnson & Walters, "Optimal Resistor Networks" (2022) appears to directly address the question of
+which resistance values can be achieved optimally with n resistors and how to find them.
+
+### Bottom line
+The instinct that "something this structured shouldn't be NP-hard" has legitimate support — the
+series-parallel case has exploitable structure (FPTAS exists for a related formulation, continued
+fractions give efficient heuristics, Fibonacci bounds constrain the search space). But nobody has
+proven it either way for the exact optimization problem. This may be genuinely at the frontier.
+
+---
+
 ## Open Questions
 - Is there an efficient algorithm for the series-parallel case that handles branching?
 - For the general (non-series-parallel) case, how would the output format work? (Adjacency list?
   Netlist? SPICE format?)
 - How much do bridge configurations actually help in practice? (A174283 shows only 1 extra value
   at n=5, 4 extra at n=6 — is it worth the complexity?)
+- Is the exact optimization problem (minimize approximation error with fewest components)
+  NP-hard, or does the series-parallel structure make it polynomial? Open question.
+
+---
+
+## Reading List
+
+### Foundational / Enumeration
+- MacMahon, "The combinations of resistances," *The Electrician* 28, pp. 601-602, 1892.
+  Reprinted in *Discrete Applied Mathematics* 54, pp. 225-228, 1994.
+- Riordan & Shannon, "The number of two-terminal series-parallel networks," *J. Math. Physics*
+  21, pp. 83-93, 1942.
+  [PDF via OEIS](https://oeis.org/A000084/a000084_1.pdf)
+
+### Bounds and Structure of Achievable Values
+- Amengual, "The intriguing properties of the equivalent resistances of n equal resistors
+  combined in series and in parallel," *Am. J. Physics* 68(2), pp. 175-179, 2000.
+  [ADS](https://ui.adsabs.harvard.edu/abs/2000AmJPh..68..175A/abstract)
+- Khan, "The bounds of the set of equivalent resistances of n equal resistors combined in series
+  and in parallel," 2010.
+  [arXiv:1004.3346](https://arxiv.org/abs/1004.3346)
+- Khan, "Farey sequences and resistor networks," *Proc. Indian Acad. Sci.* 122(2), pp. 153-162,
+  2012.
+  [ResearchGate](https://www.researchgate.net/publication/45912866)
+- Khan, "Rational and irrational numbers from unit resistors," *Eur. J. Phys.* 35, 015008, 2014.
+  [ADS](https://ui.adsabs.harvard.edu/abs/2014EJPh...35a5008K/abstract)
+
+### Continued Fractions and Resistor Networks
+- Isokawa, "Series-parallel circuits and continued fractions," *Applied Mathematical Sciences*
+  10(25-28), 2016.
+  [PDF](https://www.m-hikari.com/ams/ams-2016/ams-25-28-2016/p/isokawaAMS25-28-2016.pdf)
+
+### Bridge / Non-Series-Parallel Configurations
+- Stampfli, "Bridged graphs, circuits and Fibonacci numbers," *Appl. Math. Comput.* 302,
+  pp. 68-79, 2017.
+- Deilami & Zhelyabovskyy, "On the Average Resistance of n-circuits," 2024.
+  [arXiv:2410.07261](https://arxiv.org/abs/2410.07261)
+
+### Complexity of Related Problems
+- Chan, Lau, Schild, Wong & Zhou, "Network design for s-t effective resistance," *ACM Trans.
+  Algorithms*, 2022. General case NP-hard; FPTAS for series-parallel graphs.
+  [arXiv:1904.03219](https://arxiv.org/abs/1904.03219)
+- "Minimizing the effective graph resistance by adding links is NP-hard," 2023.
+  [arXiv:2302.12628](https://arxiv.org/abs/2302.12628)
+
+### Directly Relevant
+- Johnson & Walters, "Optimal Resistor Networks," 2022.
+  [arXiv:2206.08095](https://arxiv.org/abs/2206.08095)
+
+### Tools
+- synthres — resistance synthesis tool (brute-force enumeration via integer partitions).
+  [GitHub: kwantam/synthres](https://github.com/kwantam/synthres)
+
+### OEIS Sequences
+- [A000084](https://oeis.org/A000084) — number of series-parallel networks with n edges
+- [A048211](https://oeis.org/A048211) — distinct resistances, n identical resistors, series-parallel only
+- [A174283](https://oeis.org/A174283) — distinct resistances, n identical resistors, including bridges
+- [A337516](https://oeis.org/A337516) — distinct resistances, general configurations (bridge + fork)

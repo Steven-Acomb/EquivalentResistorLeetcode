@@ -16,6 +16,7 @@ MAX_RESISTORS = 10
 # This is OEIS https://oeis.org/A048211
 # also see: https://oeis.org/A174283
 # also see: https://oeis.org/A337516
+# all: https://oeis.org/A337517
 
 
 def generate_all_configs(base_resistances, max_resistors):
