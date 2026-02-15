@@ -77,6 +77,101 @@ distinguished edge, up to isomorphism preserving the distinguished edge.**
 *This definition is still a work in progress — it's not yet clear whether this is exactly the
 right formulation or whether additional constraints are needed. More reading and thought required.*
 
+### Ear decomposition: building general topologies edge-first
+
+A key awkwardness of this problem: resistors (edges) are the primary objects, but graph theory
+usually treats nodes as primary and edges as relationships between them. Here, junctions (nodes)
+are emergent — when you add a resistor, you might connect two existing junctions or create new
+ones. The number of nodes depends on where you put the resistors.
+
+Graph theory's answer to this is the **ear decomposition** (Whitney's theorem): every 2-connected
+graph can be built by starting with a cycle and repeatedly adding **ears** — paths that start and
+end at existing nodes, with zero or more new intermediate nodes.
+
+**Construction for resistor networks:**
+1. Start with a cycle: the battery edge + one resistor between A and B (2 nodes, 2 edges)
+2. Repeatedly add ears. An ear of length k adds **k edges** (resistors) and **k-1 new nodes**
+   (junctions):
+   - Length 1: edge between two existing nodes, no new nodes (parallel-type addition)
+   - Length 2: one new node connected to two existing nodes
+   - Length 3+: chain of new nodes bridging two existing ones
+
+**Connection to series-parallel:** If you only add ears between endpoints of existing edges, or
+subdivide existing edges, you stay in series-parallel territory. The moment you add an ear
+connecting two nodes that aren't endpoints of the same edge — like bridging M1 to M2 in the
+Wheatstone bridge — you leave it. This is the operation that series-parallel decomposition can't
+represent.
+
+**Wheatstone bridge via ear decomposition:**
+1. Start: cycle of length 3: A-M1-B-A (edges: A-M1, M1-B, A-B battery). 3 edges, 3 nodes.
+2. Ear length 2 from A to B via M2: adds A-M2, M2-B. 5 edges, 4 nodes.
+3. Ear length 1 from M1 to M2: the bridge resistor. 6 edges total (5 resistors + battery). Done.
+
+Step 3 is what makes it non-series-parallel — it connects two internal nodes (M1, M2) that aren't
+endpoints of the same existing edge. This is the operation that series-parallel decomposition
+can't represent.
+
+**Enumeration via ears:** To enumerate all topologies with n resistors, systematically generate all
+sequences of ear additions that total n+1 edges (n resistors + battery). At each step, choose
+which pair of existing nodes to attach the ear to and how long to make it. Whitney's theorem
+guarantees completeness: every 2-connected graph has at least one ear decomposition, so every
+topology will appear. Different ear sequences can produce the same graph, so deduplication (by
+graph isomorphism preserving the battery edge) is needed.
+
+### Walkthrough: all topologies for n ≤ 3
+
+Enumerated by trying all initial cycle lengths and ear additions, deduplicating by isomorphism.
+
+**n=1 (2 total edges):**
+
+Only possibility: cycle of length 2 (A-B battery, A-B resistor). **1 topology.**
+
+| Topology | Edges | Value (1Ω) | Description |
+|----------|-------|-----------|-------------|
+| 1 | A-B(bat), A-B | 1 | Single resistor |
+
+**n=2 (3 total edges):**
+
+- Cycle 2 + ear 1 (A→B): three parallel edges. Two resistors in parallel.
+- Cycle 3 (A-M-B-A): triangle with battery on A-B. Two resistors in series.
+
+**2 topologies**, both series-parallel.
+
+| Topology | Edges | Value (1Ω) | Description |
+|----------|-------|-----------|-------------|
+| 1 | A-B(bat), A-B, A-B | 1/2 | Two parallel |
+| 2 | A-B(bat), A-M, M-B | 2 | Two series |
+
+**n=3 (4 total edges):**
+
+- **Cycle 2 + two ears of length 1** (A→B, A→B): four parallel A-B edges.
+  = three resistors in parallel.
+
+- **Cycle 2 + ear of length 2** (A→M→B): edges A-B(bat), A-B, A-M, M-B.
+  = R // (R+R). One resistor parallel with two in series.
+  *(Same graph reached by: cycle 3 (A-M-B-A) + ear 1 (A→B). Duplicate.)*
+
+- **Cycle 3 + ear of length 1** (A→M): edges A-B(bat), A-M, A-M, M-B.
+  = (R//R) + R. Parallel pair in series with one.
+  *(Ear M→B gives isomorphic graph — swap A↔B, battery is undirected. Duplicate.)*
+
+- **Cycle 4** (A-M1-M2-B-A): edges A-B(bat), A-M1, M1-M2, M2-B.
+  = three resistors in series.
+
+5+ nodes impossible (4 edges, average degree < 2, can't be 2-connected).
+
+**4 topologies**, all series-parallel. Matches config_explorer output exactly.
+
+| # | Construction | Value (1Ω) | Description |
+|---|-------------|-----------|-------------|
+| 1 | Cycle 2 + ear 1 + ear 1 | 1/3 | Three parallel |
+| 2 | Cycle 3 + ear 1 (A-M) | 3/2 | (R//R) + R |
+| 3 | Cycle 2 + ear 2 | 2/3 | R // (R+R) |
+| 4 | Cycle 4 | 3 | Three series |
+
+All four are series-parallel, as expected — non-series-parallel topologies first appear at n=5
+(Wheatstone bridge requires 5 resistors + battery = 6 edges, 4 nodes).
+
 ### Series-parallel counts (from config_explorer.py)
 
 For n identical 1-ohm resistors (series-parallel only):
