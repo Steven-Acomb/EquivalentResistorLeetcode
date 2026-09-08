@@ -8,6 +8,13 @@ The platform is being built incrementally: local-first development now, eventual
 
 ## Current State
 
+**Shelved as of September 2026.** Before doing anything, read `REDESIGN.md`: it records
+why the project stalled (SCF and the harness only cover series-parallel networks, not
+arbitrary resistor graphs), the accepted plan (three-version ladder, exact arithmetic,
+oracle-generated tests, Docker, V3 netlist format), and the task order. Phases 4 and 5
+in ROADMAP.md are superseded by it. Research notes live on the unmerged
+`origin/stephen_tree_solution` branch.
+
 Phases 0 (repo restructure), 1 (Python support), 2 (local execution engine), 2.5 (engine hardening), most of 3 (local workbench), and 3.5 (UI polish) are complete. The repo contains:
 
 - **One problem** (Equivalent Resistance) with a full description, test cases, and harnesses for two languages.
