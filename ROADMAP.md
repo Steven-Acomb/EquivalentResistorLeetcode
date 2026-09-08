@@ -2,6 +2,10 @@
 
 Local-first leetcode-like platform, all runnable from a single repo clone.
 
+> **September 2026:** Phases 4 and 5 below are superseded. The project stalled on a
+> content problem (SCF only describes series-parallel networks). The decision and the
+> new task order are in [REDESIGN.md](REDESIGN.md). Read that first.
+
 ## Phase 0: Repo Restructure (done)
 
 Reorganize from single-Java-problem layout to a multi-language platform structure.
